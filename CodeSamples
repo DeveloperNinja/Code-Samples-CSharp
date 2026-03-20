@@ -1,0 +1,2973 @@
+/*
+================================================================================
+  50 C# CODE EXAMPLES — BEGINNER TO EXPERT
+  Professor's Teaching Reference File
+
+  Organized into 5 tiers:
+    TIER 1 (Examples  1–10): Beginner       — Syntax, types, I/O, operators
+    TIER 2 (Examples 11–20): Beginner+      — Methods, arrays, collections, LINQ basics
+    TIER 3 (Examples 21–30): Intermediate   — OOP, interfaces, generics, exceptions
+    TIER 4 (Examples 31–40): Advanced       — Delegates, events, lambdas, async/await
+    TIER 5 (Examples 41–50): Expert         — Reflection, attributes, patterns, Span<T>
+
+  HOW TO RUN:
+    dotnet new console -n CSharpExamples
+    Replace Program.cs with this file (add "using" directives at top)
+    dotnet run
+
+  Each example is a static method called from Main().
+  Expected output is shown in comments next to each statement.
+================================================================================
+*/
+
+using System;
+using System.Collections.Generic;
+using System.Collections.Concurrent;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Diagnostics;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+
+// ── Top-level Program entry point (C# 9+) ────────────────────────────────────
+// Uncomment each group as you teach it.
+
+Examples.Tier1.Run();
+Examples.Tier2.Run();
+Examples.Tier3.Run();
+Examples.Tier4.Run();
+Examples.Tier5.Run();
+
+// =============================================================================
+// TIER 1 — BEGINNER (Examples 1–10)
+// =============================================================================
+namespace Examples
+{
+    static class Tier1
+    {
+        public static void Run()
+        {
+            Example01_HelloWorldAndOutput();
+            Example02_VariablesAndDataTypes();
+            Example03_ArithmeticAndMath();
+            Example04_StringsAndStringMethods();
+            Example05_ArrayBasics();
+            Example06_ConditionalStatements();
+            Example07_Loops();
+            Example08_TypeConversionAndParsing();
+            Example09_NullableTypesAndNullCoalescing();
+            Example10_ConsoleInputOutput();
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 1: Hello World & Output Formatting
+        // Concepts: Console.Write/WriteLine, string interpolation, verbatim strings
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example01_HelloWorldAndOutput()
+        {
+            Console.WriteLine("--- Example 1: Hello World & Output ---");
+
+            // Basic output
+            Console.WriteLine("Hello, World!");                      // Hello, World!
+
+            // String interpolation ($"") — preferred modern style
+            string name = "Alice";
+            int age = 30;
+            double gpa = 3.85;
+            Console.WriteLine($"Hello, {name}! Age: {age}, GPA: {gpa:F2}"); 
+            // Hello, Alice! Age: 30, GPA: 3.85
+
+            // Format specifiers inside interpolation
+            double price = 1234567.89;
+            Console.WriteLine($"Price: {price:C}");     // Price: $1,234,567.89 (culture-dependent)
+            Console.WriteLine($"Pi:    {Math.PI:F4}");  // Pi:    3.1416
+            Console.WriteLine($"Hex:   {255:X}");       // Hex:   FF
+            Console.WriteLine($"Pad:   {42,10}");       // Pad:          42  (right-aligned in 10 chars)
+            Console.WriteLine($"Left:  {42,-10}|");     // Left:  42        |
+
+            // Verbatim string — @ prefix, no escape processing
+            string path = @"C:\Users\Alice\Documents\file.txt";
+            Console.WriteLine(path);   // C:\Users\Alice\Documents\file.txt
+
+            // Multi-line raw string literal (C# 11+)
+            // string json = """
+            //     { "name": "Alice" }
+            //     """;
+
+            // String.Format — older style, still common in legacy code
+            Console.WriteLine(String.Format("Name: {0}, Age: {1}", name, age));
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 2: Variables & Data Types
+        // Concepts: value types, reference types, var, const, sizeof
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example02_VariablesAndDataTypes()
+        {
+            Console.WriteLine("--- Example 2: Variables & Data Types ---");
+
+            // Value types — stored on the stack
+            int    myInt    = 42;
+            long   myLong   = 9_876_543_210L;   // digit separators for readability
+            double myDouble = 3.14159265358979;
+            float  myFloat  = 3.14f;             // f suffix required
+            decimal myDecimal = 19.99m;          // m suffix; exact decimal math (financial)
+            bool   myBool   = true;
+            char   myChar   = 'A';
+
+            // Reference types — stored on the heap
+            string myStr    = "C# is great";
+            object myObj    = 42;               // boxing: int → object
+
+            // var — compiler infers type (still strongly typed)
+            var inferred = "I'm a string";      // type is string at compile time
+            Console.WriteLine(inferred.GetType()); // System.String
+
+            // const — compile-time constant
+            const double GravityMs2 = 9.81;
+
+            // Checking type
+            Console.WriteLine(myInt.GetType());       // System.Int32
+            Console.WriteLine(myStr is string);       // True
+            Console.WriteLine(myObj is int boxed);    // True  (pattern matching + declaration)
+            Console.WriteLine(boxed);                 // 42
+
+            // Default values
+            int    defaultInt    = default;    // 0
+            bool   defaultBool   = default;    // False
+            string defaultString = default;    // null
+
+            Console.WriteLine($"Sizes: int={sizeof(int)}, long={sizeof(long)}, " +
+                              $"double={sizeof(double)}, char={sizeof(char)}");
+            // Sizes: int=4, long=8, double=8, char=2
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 3: Arithmetic & Math Operations
+        // Concepts: operators, Math class, checked arithmetic, integer division
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example03_ArithmeticAndMath()
+        {
+            Console.WriteLine("--- Example 3: Arithmetic & Math ---");
+
+            int a = 17, b = 5;
+
+            Console.WriteLine(a + b);    // 22
+            Console.WriteLine(a - b);    // 12
+            Console.WriteLine(a * b);    // 85
+            Console.WriteLine(a / b);    // 3   — integer division truncates!
+            Console.WriteLine(a % b);    // 2   — modulo (remainder)
+            Console.WriteLine((double)a / b);  // 3.4  — cast to double first
+
+            // Exponentiation (no ** operator in C#; use Math.Pow)
+            Console.WriteLine(Math.Pow(2, 10));   // 1024
+            Console.WriteLine(Math.Sqrt(144));    // 12
+            Console.WriteLine(Math.Abs(-42));     // 42
+            Console.WriteLine(Math.Ceiling(3.2)); // 4
+            Console.WriteLine(Math.Floor(3.9));   // 3
+            Console.WriteLine(Math.Round(3.5, MidpointRounding.AwayFromZero)); // 4
+            Console.WriteLine(Math.Log(100, 10)); // 2
+            Console.WriteLine(Math.PI);           // 3.141592653589793
+
+            // Augmented assignment operators
+            int x = 10;
+            x += 5;   // 15
+            x -= 3;   // 12
+            x *= 2;   // 24
+            x /= 4;   // 6
+            x %= 4;   // 2
+            Console.WriteLine(x);  // 2
+
+            // Increment/Decrement
+            int n = 5;
+            Console.WriteLine(n++);  // 5 — post-increment: returns then increments
+            Console.WriteLine(n);    // 6
+            Console.WriteLine(++n);  // 7 — pre-increment: increments then returns
+
+            // Overflow detection with checked
+            try
+            {
+                checked
+                {
+                    int max = int.MaxValue;
+                    int overflow = max + 1;   // throws OverflowException
+                }
+            }
+            catch (OverflowException)
+            {
+                Console.WriteLine("OverflowException caught in checked block");
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 4: Strings & String Methods
+        // Concepts: immutability, common methods, StringBuilder, interpolation
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example04_StringsAndStringMethods()
+        {
+            Console.WriteLine("--- Example 4: Strings & String Methods ---");
+
+            string s = "Hello, C# World!";
+
+            // Properties
+            Console.WriteLine(s.Length);              // 16
+            Console.WriteLine(s[0]);                  // H  (indexer)
+            Console.WriteLine(s[^1]);                 // !  (index from end, C# 8+)
+
+            // Slicing with Range (C# 8+)
+            Console.WriteLine(s[7..9]);               // C#
+            Console.WriteLine(s[..5]);                // Hello
+            Console.WriteLine(s[7..]);                // C# World!
+
+            // Common methods
+            Console.WriteLine(s.ToUpper());           // HELLO, C# WORLD!
+            Console.WriteLine(s.ToLower());           // hello, c# world!
+            Console.WriteLine(s.Replace("World", "Universe")); // Hello, C# Universe!
+            Console.WriteLine(s.Contains("C#"));     // True
+            Console.WriteLine(s.StartsWith("Hello")); // True
+            Console.WriteLine(s.IndexOf("World"));   // 10
+            Console.WriteLine(s.Substring(7, 2));    // C#
+            Console.WriteLine("  spaces  ".Trim());  // 'spaces'
+
+            // Split and Join
+            string csv = "apple,banana,cherry";
+            string[] fruits = csv.Split(',');
+            Console.WriteLine(fruits[1]);             // banana
+            Console.WriteLine(string.Join(" | ", fruits)); // apple | banana | cherry
+
+            // String comparison (always use Ordinal for code, CurrentCulture for UI)
+            Console.WriteLine(string.Equals("abc", "ABC", StringComparison.OrdinalIgnoreCase)); // True
+
+            // StringBuilder — efficient mutable string (avoids creating many string objects)
+            var sb = new StringBuilder();
+            for (int i = 1; i <= 5; i++)
+                sb.Append(i).Append(i < 5 ? ", " : "");
+            Console.WriteLine(sb.ToString());         // 1, 2, 3, 4, 5
+
+            // String.IsNullOrEmpty / IsNullOrWhiteSpace
+            Console.WriteLine(string.IsNullOrEmpty(""));      // True
+            Console.WriteLine(string.IsNullOrWhiteSpace(" ")); // True
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 5: Arrays
+        // Concepts: single/multi-dim arrays, Array methods, ranges
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example05_ArrayBasics()
+        {
+            Console.WriteLine("--- Example 5: Arrays ---");
+
+            // Declaration and initialization
+            int[] numbers = { 64, 34, 25, 12, 22, 11, 90 };
+            string[] fruits = new string[3];   // allocated but uninitialized (null)
+            fruits[0] = "apple";
+            fruits[1] = "banana";
+            fruits[2] = "cherry";
+
+            Console.WriteLine(numbers.Length);    // 7
+            Console.WriteLine(numbers[0]);        // 64
+            Console.WriteLine(numbers[^1]);       // 90  (last element)
+
+            // Sorting and searching
+            Array.Sort(numbers);
+            Console.WriteLine(string.Join(", ", numbers));  // 11, 12, 22, 25, 34, 64, 90
+            int idx = Array.BinarySearch(numbers, 25);
+            Console.WriteLine($"25 is at index {idx}");    // 25 is at index 2
+
+            // Array.IndexOf — linear search
+            int pos = Array.IndexOf(fruits, "banana");
+            Console.WriteLine(pos);              // 1
+
+            // Copy, Reverse, Clear
+            int[] copy = new int[numbers.Length];
+            Array.Copy(numbers, copy, numbers.Length);
+            Array.Reverse(copy);
+            Console.WriteLine(string.Join(", ", copy));  // 90, 64, 34, 25, 22, 12, 11
+
+            // 2D array (rectangular)
+            int[,] matrix = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 9 } };
+            Console.WriteLine(matrix[1, 2]);     // 6  (row 1, col 2)
+
+            // Jagged array — array of arrays (rows can have different lengths)
+            int[][] jagged = new int[3][];
+            jagged[0] = new[] { 1, 2 };
+            jagged[1] = new[] { 3, 4, 5 };
+            jagged[2] = new[] { 6 };
+            Console.WriteLine(jagged[1][2]);     // 5
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 6: Conditional Statements
+        // Concepts: if/else, switch expression, ternary, pattern matching
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example06_ConditionalStatements()
+        {
+            Console.WriteLine("--- Example 6: Conditionals ---");
+
+            int score = 78;
+
+            // Classic if/else if/else
+            string grade;
+            if      (score >= 90) grade = "A";
+            else if (score >= 80) grade = "B";
+            else if (score >= 70) grade = "C";
+            else if (score >= 60) grade = "D";
+            else                  grade = "F";
+            Console.WriteLine($"Score {score} → Grade {grade}");  // Score 78 → Grade C
+
+            // Ternary operator
+            string status = score >= 60 ? "Pass" : "Fail";
+            Console.WriteLine(status);   // Pass
+
+            // Switch statement (classic)
+            int day = 3;
+            switch (day)
+            {
+                case 1: Console.WriteLine("Monday"); break;
+                case 2: Console.WriteLine("Tuesday"); break;
+                case 3: Console.WriteLine("Wednesday"); break;
+                default: Console.WriteLine("Other"); break;
+            }
+
+            // Switch expression (C# 8+) — concise and returns a value
+            string dayName = day switch
+            {
+                1 => "Monday",
+                2 => "Tuesday",
+                3 => "Wednesday",
+                4 => "Thursday",
+                5 => "Friday",
+                _ => "Weekend"   // _ is the discard (default)
+            };
+            Console.WriteLine(dayName);   // Wednesday
+
+            // Type pattern matching (C# 7+)
+            object obj = 3.14;
+            if (obj is double d)
+                Console.WriteLine($"It's a double: {d}");  // It's a double: 3.14
+
+            // Switch with pattern matching (C# 9+ relational patterns)
+            string classification = score switch
+            {
+                >= 90 => "Excellent",
+                >= 70 => "Good",
+                >= 50 => "Average",
+                _     => "Below Average"
+            };
+            Console.WriteLine(classification);   // Good
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 7: Loops
+        // Concepts: for, while, do-while, foreach, break, continue, goto
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example07_Loops()
+        {
+            Console.WriteLine("--- Example 7: Loops ---");
+
+            // for loop
+            for (int i = 0; i < 5; i++)
+                Console.Write(i + " ");   // 0 1 2 3 4
+            Console.WriteLine();
+
+            // while loop
+            int count = 5;
+            while (count > 0)
+            {
+                Console.Write(count + " ");
+                count--;
+            }
+            Console.WriteLine();  // 5 4 3 2 1
+
+            // do-while — executes body at least once
+            int x = 0;
+            do
+            {
+                Console.Write(x + " ");
+                x++;
+            } while (x < 3);
+            Console.WriteLine();  // 0 1 2
+
+            // foreach — iterate over any IEnumerable
+            string[] fruits = { "apple", "banana", "cherry" };
+            foreach (string fruit in fruits)
+                Console.Write(fruit + " ");
+            Console.WriteLine();  // apple banana cherry
+
+            // break and continue
+            for (int i = 0; i < 10; i++)
+            {
+                if (i == 3) continue;   // skip 3
+                if (i == 7) break;      // stop at 7
+                Console.Write(i + " ");
+            }
+            Console.WriteLine();  // 0 1 2 4 5 6
+
+            // Nested loops with labeled break using goto
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 3; j++)
+                {
+                    if (i == 1 && j == 1) goto Done;
+                    Console.Write($"({i},{j}) ");
+                }
+            }
+            Done:
+            Console.WriteLine("← jumped here");  // (0,0) (0,1) (0,2) (1,0) ← jumped here
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 8: Type Conversion & Parsing
+        // Concepts: implicit/explicit cast, Convert, TryParse, as/is
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example08_TypeConversionAndParsing()
+        {
+            Console.WriteLine("--- Example 8: Type Conversion & Parsing ---");
+
+            // Implicit conversion (safe, no data loss)
+            int myInt = 42;
+            double myDouble = myInt;         // int → double is implicit
+            Console.WriteLine(myDouble);     // 42
+
+            // Explicit cast (may lose data)
+            double pi = 3.14159;
+            int truncated = (int)pi;         // truncates decimal part
+            Console.WriteLine(truncated);    // 3
+
+            // Convert class — handles null and uses culture settings
+            string numStr = "123";
+            int converted = Convert.ToInt32(numStr);
+            Console.WriteLine(converted);    // 123
+            Console.WriteLine(Convert.ToBoolean(1));  // True
+            Console.WriteLine(Convert.ToString(255, 16)); // ff (base 16)
+
+            // int.TryParse — safe parsing, no exception on failure
+            string input = "42abc";
+            if (int.TryParse(input, out int result))
+                Console.WriteLine($"Parsed: {result}");
+            else
+                Console.WriteLine($"'{input}' is not a valid integer");
+            // '42abc' is not a valid integer
+
+            // TryParse returns true/false; out parameter holds result
+            Console.WriteLine(double.TryParse("3.14", out double d));  // True
+            Console.WriteLine(d);                                       // 3.14
+
+            // as operator — returns null instead of throwing on failure
+            object obj = "Hello";
+            string? str = obj as string;     // succeeds: str = "Hello"
+            int?  num   = obj as int?;       // fails: num = null (no exception)
+            Console.WriteLine(str);          // Hello
+            Console.WriteLine(num is null);  // True
+
+            // Boxing and Unboxing
+            int boxable = 99;
+            object boxed = boxable;          // boxing: value type → object (heap)
+            int unboxed = (int)boxed;        // unboxing: must cast to exact type
+            Console.WriteLine(unboxed);      // 99
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 9: Nullable Types & Null Handling
+        // Concepts: Nullable<T>, ??, ??=, ?., null-forgiving operator
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example09_NullableTypesAndNullCoalescing()
+        {
+            Console.WriteLine("--- Example 9: Nullable Types & Null Handling ---");
+
+            // Nullable value type — int? is shorthand for Nullable<int>
+            int? maybeAge = null;
+            Console.WriteLine(maybeAge.HasValue);       // False
+            Console.WriteLine(maybeAge.GetValueOrDefault(0)); // 0
+
+            maybeAge = 25;
+            Console.WriteLine(maybeAge.HasValue);       // True
+            Console.WriteLine(maybeAge.Value);          // 25
+
+            // Null-coalescing operator ?? — return right if left is null
+            string? name = null;
+            string displayName = name ?? "Anonymous";
+            Console.WriteLine(displayName);             // Anonymous
+
+            // ??= null-coalescing assignment (C# 8+)
+            name ??= "Default Name";                   // assigns only if null
+            Console.WriteLine(name);                   // Default Name
+
+            // Null-conditional operator ?. — short-circuits on null
+            string? maybeStr = null;
+            int? length = maybeStr?.Length;            // null instead of NullReferenceException
+            Console.WriteLine(length is null);         // True
+
+            string? value = "Hello";
+            Console.WriteLine(value?.ToUpper());       // HELLO
+            Console.WriteLine(value?.Length ?? -1);    // 5
+
+            // Null-conditional with indexer and method chaining
+            List<string>? list = null;
+            int? count = list?.Count;                  // null, not exception
+            Console.WriteLine(count ?? 0);             // 0
+
+            // Null-forgiving operator ! — tells compiler "trust me, not null"
+            // Use sparingly — suppresses nullable warnings only
+            string definitelyNotNull = name!;          // asserts non-null at design time
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 10: Console I/O & String Parsing
+        // Concepts: Console.ReadLine, input validation, formatted output tables
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example10_ConsoleInputOutput()
+        {
+            Console.WriteLine("--- Example 10: Console I/O ---");
+
+            // NOTE: We simulate user input here instead of blocking.
+            // In a real program: string input = Console.ReadLine() ?? "";
+
+            string simulatedInput = "25";
+            if (int.TryParse(simulatedInput, out int age))
+                Console.WriteLine($"Next year you will be {age + 1}");  // 26
+
+            // Formatted table output using padding
+            Console.WriteLine($"{"Name",-12} {"Score",6} {"Grade",6}");
+            Console.WriteLine(new string('-', 26));
+            var rows = new[] {
+                ("Alice",   92, "A"),
+                ("Bob",     85, "B"),
+                ("Carol",   78, "C+"),
+            };
+            foreach (var (n, s, g) in rows)
+                Console.WriteLine($"{n,-12} {s,6} {g,6}");
+            // Name          Score  Grade
+            // --------------------------
+            // Alice            92      A
+            // Bob              85      B
+            // Carol            78     C+
+
+            // Console colors
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Success message in green");
+            Console.ResetColor();
+
+            // Environment info
+            Console.WriteLine($"OS: {Environment.OSVersion.Platform}");
+            Console.WriteLine($"64-bit: {Environment.Is64BitProcess}");
+            Console.WriteLine($".NET: {Environment.Version}");
+        }
+    }
+
+    // =========================================================================
+    // TIER 2 — BEGINNER+ (Examples 11–20)
+    // Methods, collections, LINQ, files, exceptions
+    // =========================================================================
+    static class Tier2
+    {
+        public static void Run()
+        {
+            Example11_MethodsAndParameters();
+            Example12_ListAndDictionary();
+            Example13_Tuples();
+            Example14_EnumsAndStructs();
+            Example15_ExceptionHandling();
+            Example16_FileIO();
+            Example17_LINQBasics();
+            Example18_LINQAdvanced();
+            Example19_RegularExpressions();
+            Example20_DateTimeAndTimeSpan();
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 11: Methods & Parameters
+        // Concepts: overloading, default params, ref/out/in, params keyword
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example11_MethodsAndParameters()
+        {
+            Console.WriteLine("--- Example 11: Methods & Parameters ---");
+
+            // Basic method call
+            Console.WriteLine(Greet("Alice"));           // Hello, Alice!
+            Console.WriteLine(Greet("Bob", "Hi"));       // Hi, Bob!
+
+            // Method overloading — same name, different parameters
+            Console.WriteLine(Add(3, 4));                // 7
+            Console.WriteLine(Add(3.0, 4.0));            // 7
+            Console.WriteLine(Add(1, 2, 3, 4, 5));       // 15  (params array)
+
+            // ref — pass value type by reference (caller's variable is modified)
+            int val = 10;
+            Double(ref val);
+            Console.WriteLine(val);                      // 20
+
+            // out — method MUST assign before returning
+            bool ok = TryDivide(10, 2, out double quotient);
+            Console.WriteLine($"{ok}, {quotient}");      // True, 5
+
+            // in — pass by reference but read-only inside method (performance hint)
+            var pt = new System.Drawing.Point(3, 4);
+            // Console.WriteLine(Magnitude(in pt));      // requires System.Drawing
+
+            // Expression-bodied method (C# 6+)
+            static double Square(double x) => x * x;
+            Console.WriteLine(Square(9));                // 81
+        }
+
+        static string Greet(string name, string greeting = "Hello") => $"{greeting}, {name}!";
+
+        static int    Add(int a, int b)       => a + b;
+        static double Add(double a, double b) => a + b;
+        static int    Add(params int[] nums)  => nums.Sum();  // params: call with any # of args
+
+        static void Double(ref int n) => n *= 2;
+
+        static bool TryDivide(int a, int b, out double result)
+        {
+            if (b == 0) { result = 0; return false; }
+            result = (double)a / b;
+            return true;
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 12: List<T> and Dictionary<TKey, TValue>
+        // Concepts: generic collections, CRUD, iteration
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example12_ListAndDictionary()
+        {
+            Console.WriteLine("--- Example 12: List & Dictionary ---");
+
+            // List<T>
+            var fruits = new List<string> { "apple", "banana", "cherry" };
+            fruits.Add("date");
+            fruits.Insert(1, "avocado");          // insert at index 1
+            fruits.Remove("banana");              // remove first occurrence
+            Console.WriteLine(fruits.Count);      // 4
+            Console.WriteLine(fruits.Contains("cherry")); // True
+            fruits.Sort();
+            Console.WriteLine(string.Join(", ", fruits)); // apple, avocado, cherry, date
+
+            // List searching
+            int idx = fruits.FindIndex(f => f.StartsWith("a")); // first match
+            Console.WriteLine(idx);               // 0
+            var aFruits = fruits.FindAll(f => f.Contains("a"));
+            Console.WriteLine(string.Join(", ", aFruits));  // apple, avocado, date
+
+            // Dictionary<TKey, TValue>
+            var student = new Dictionary<string, object>
+            {
+                ["name"]    = "Bob",
+                ["age"]     = 22,
+                ["gpa"]     = 3.5
+            };
+            student["email"] = "bob@school.edu";    // add/update key
+            student.Remove("email");
+
+            // Safe access
+            if (student.TryGetValue("gpa", out object gpa))
+                Console.WriteLine($"GPA: {gpa}");   // GPA: 3.5
+
+            // Iteration
+            foreach (var (key, value) in student)
+                Console.WriteLine($"  {key}: {value}");
+
+            Console.WriteLine(student.ContainsKey("name"));  // True
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 13: Tuples & Deconstruction
+        // Concepts: ValueTuple, named tuples, deconstruct, swap trick
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example13_Tuples()
+        {
+            Console.WriteLine("--- Example 13: Tuples ---");
+
+            // Named tuple — ValueTuple with element names (C# 7+)
+            var point = (X: 3.0, Y: 4.0);
+            Console.WriteLine(point.X);         // 3
+            Console.WriteLine(point.Y);         // 4
+
+            // Method returning named tuple
+            var (min, max, avg) = MinMaxAvg(new[] { 4, 7, 2, 9, 1 });
+            Console.WriteLine($"Min={min}, Max={max}, Avg={avg:F1}"); // Min=1, Max=9, Avg=4.6
+
+            // Deconstruction — unpack into separate variables
+            (int a, int b) = (10, 20);
+            Console.WriteLine($"a={a}, b={b}");  // a=10, b=20
+
+            // Swap using tuple deconstruction (no temp variable needed!)
+            (a, b) = (b, a);
+            Console.WriteLine($"a={a}, b={b}");  // a=20, b=10  (swapped)
+
+            // Discard _ — ignore tuple elements you don't need
+            var (_, second, _) = (1, 2, 3);
+            Console.WriteLine(second);           // 2
+
+            // Tuple equality (C# 7.3+)
+            var t1 = (1, "hello");
+            var t2 = (1, "hello");
+            Console.WriteLine(t1 == t2);         // True
+        }
+
+        static (int Min, int Max, double Avg) MinMaxAvg(int[] data) =>
+            (data.Min(), data.Max(), data.Average());
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 14: Enums & Structs
+        // Concepts: enum flags, struct value semantics, record struct (C# 10)
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example14_EnumsAndStructs()
+        {
+            Console.WriteLine("--- Example 14: Enums & Structs ---");
+
+            // Enum
+            var today = DayOfWeek.Wednesday;
+            Console.WriteLine(today);              // Wednesday
+            Console.WriteLine((int)today);         // 3
+            Console.WriteLine(Enum.GetName(today)); // Wednesday
+
+            // Parse enum from string
+            var parsed = Enum.Parse<DayOfWeek>("Friday");
+            Console.WriteLine(parsed);             // Friday
+
+            // [Flags] enum — bitwise combinations
+            FileAccess access = FileAccess.Read | FileAccess.Write;
+            Console.WriteLine(access);             // ReadWrite
+            Console.WriteLine(access.HasFlag(FileAccess.Read));  // True
+
+            // Custom struct — value type, lives on stack
+            var v = new Vector2D(3, 4);
+            Console.WriteLine(v.Magnitude());      // 5
+            Console.WriteLine(v);                  // (3, 4)
+
+            // Structs are copied on assignment
+            var v2 = v;
+            // v2.X = 99;  // if X were mutable, v would be unchanged
+
+            // record struct (C# 10) — immutable value type with auto ToString/Equals
+            var color = new RgbColor(255, 0, 128);
+            Console.WriteLine(color);              // RgbColor { R = 255, G = 0, B = 128 }
+        }
+
+        enum FileAccess { None = 0, Read = 1, Write = 2, ReadWrite = Read | Write }
+
+        struct Vector2D
+        {
+            public readonly double X, Y;
+            public Vector2D(double x, double y) { X = x; Y = y; }
+            public double Magnitude() => Math.Sqrt(X * X + Y * Y);
+            public override string ToString() => $"({X}, {Y})";
+        }
+
+        record struct RgbColor(int R, int G, int B);
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 15: Exception Handling
+        // Concepts: try/catch/finally, when filters, custom exceptions, throw expressions
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example15_ExceptionHandling()
+        {
+            Console.WriteLine("--- Example 15: Exception Handling ---");
+
+            // Basic try/catch/finally
+            static double Divide(double a, double b)
+            {
+                try
+                {
+                    if (b == 0) throw new DivideByZeroException("Denominator cannot be zero.");
+                    return a / b;
+                }
+                catch (DivideByZeroException ex)
+                {
+                    Console.WriteLine($"Caught: {ex.Message}");
+                    return double.NaN;
+                }
+                finally
+                {
+                    Console.WriteLine("Divide() call finished.");  // always runs
+                }
+            }
+
+            Console.WriteLine(Divide(10, 2));   // 5  → Divide() call finished.
+            Console.WriteLine(Divide(10, 0));   // Caught: ... → Divide() call finished.
+
+            // Catch with when filter — catches only when condition is true
+            try
+            {
+                int[] arr = new int[3];
+                arr[5] = 1;  // IndexOutOfRangeException
+            }
+            catch (IndexOutOfRangeException ex) when (ex.Message.Contains("index"))
+            {
+                Console.WriteLine("Caught with when filter");
+            }
+
+            // Exception hierarchy — catch most specific first
+            try { throw new ArgumentNullException("name"); }
+            catch (ArgumentNullException ex) { Console.WriteLine($"ArgumentNull: {ex.ParamName}"); }
+            catch (ArgumentException)        { Console.WriteLine("Argument (never reached)"); }
+
+            // Custom exception
+            try { SetAge(-1); }
+            catch (InvalidAgeException ex)
+            { Console.WriteLine($"Custom: {ex.Message}, Age={ex.Age}"); }
+
+            // Throw expression (C# 7+) — throw inside expressions
+            static string NonNull(string? s) => s ?? throw new ArgumentNullException(nameof(s));
+            Console.WriteLine(NonNull("ok"));  // ok
+        }
+
+        static void SetAge(int age)
+        {
+            if (age < 0 || age > 150) throw new InvalidAgeException(age);
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 16: File I/O
+        // Concepts: File, StreamReader/Writer, Path, Directory
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example16_FileIO()
+        {
+            Console.WriteLine("--- Example 16: File I/O ---");
+
+            string path = Path.Combine(Path.GetTempPath(), "students.txt");
+
+            // Write all lines at once
+            File.WriteAllLines(path, new[] { "Alice,90", "Bob,85", "Carol,92" });
+
+            // Read all text at once
+            string all = File.ReadAllText(path);
+            Console.WriteLine(all);
+
+            // Read line by line with StreamReader (memory-efficient for large files)
+            using (var reader = new StreamReader(path))
+            {
+                string? line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    var parts = line.Split(',');
+                    Console.WriteLine($"{parts[0]} scored {parts[1]}");
+                }
+            }
+
+            // Append a line
+            File.AppendAllText(path, "Dave,78\n");
+            Console.WriteLine($"Lines: {File.ReadAllLines(path).Length}");  // 4
+
+            // Path manipulation (cross-platform with Path class)
+            Console.WriteLine(Path.GetFileName(path));     // students.txt
+            Console.WriteLine(Path.GetExtension(path));    // .txt
+            Console.WriteLine(Path.GetDirectoryName(path));
+
+            // Directory operations
+            string dir = Path.Combine(Path.GetTempPath(), "TestDir");
+            Directory.CreateDirectory(dir);
+            Console.WriteLine(Directory.Exists(dir));  // True
+            Directory.Delete(dir);
+
+            File.Delete(path);  // cleanup
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 17: LINQ Basics
+        // Concepts: Where, Select, OrderBy, FirstOrDefault, Any, Count, Sum
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example17_LINQBasics()
+        {
+            Console.WriteLine("--- Example 17: LINQ Basics ---");
+
+            var numbers = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+
+            // Method syntax (most common)
+            var evens = numbers.Where(n => n % 2 == 0).ToList();
+            Console.WriteLine(string.Join(", ", evens)); // 2, 4, 6, 8, 10
+
+            var squares = numbers.Select(n => n * n).ToList();
+            Console.WriteLine(string.Join(", ", squares)); // 1, 4, 9, 16, ...
+
+            // Chaining
+            var result = numbers
+                .Where(n => n % 2 != 0)    // odd numbers
+                .Select(n => n * n)         // square them
+                .OrderByDescending(n => n) // sort descending
+                .Take(3);                   // top 3
+            Console.WriteLine(string.Join(", ", result)); // 81, 49, 25
+
+            // Aggregates
+            Console.WriteLine(numbers.Sum());           // 55
+            Console.WriteLine(numbers.Average());       // 5.5
+            Console.WriteLine(numbers.Min());           // 1
+            Console.WriteLine(numbers.Max());           // 10
+            Console.WriteLine(numbers.Count(n => n > 5)); // 5
+
+            // Any, All, Contains
+            Console.WriteLine(numbers.Any(n => n > 9));  // True
+            Console.WriteLine(numbers.All(n => n > 0));  // True
+            Console.WriteLine(numbers.Contains(7));      // True
+
+            // FirstOrDefault — returns default if no match (null for ref types, 0 for int)
+            int first = numbers.FirstOrDefault(n => n > 100); // 0 (not found)
+            Console.WriteLine(first);  // 0
+
+            // Query syntax (SQL-like)
+            var query = from n in numbers
+                        where n % 3 == 0
+                        orderby n descending
+                        select n * 2;
+            Console.WriteLine(string.Join(", ", query)); // 18, 12, 6
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 18: LINQ Advanced
+        // Concepts: GroupBy, Join, Distinct, Zip, ToDictionary, SelectMany
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example18_LINQAdvanced()
+        {
+            Console.WriteLine("--- Example 18: LINQ Advanced ---");
+
+            var students = new[]
+            {
+                new { Name = "Alice",   Dept = "CS",   GPA = 3.9 },
+                new { Name = "Bob",     Dept = "Math", GPA = 3.5 },
+                new { Name = "Carol",   Dept = "CS",   GPA = 3.7 },
+                new { Name = "Dave",    Dept = "Math", GPA = 3.2 },
+                new { Name = "Eve",     Dept = "CS",   GPA = 3.8 },
+            };
+
+            // GroupBy
+            var byDept = students.GroupBy(s => s.Dept);
+            foreach (var group in byDept)
+            {
+                double avgGpa = group.Average(s => s.GPA);
+                Console.WriteLine($"{group.Key}: {group.Count()} students, avg GPA {avgGpa:F2}");
+            }
+            // CS: 3 students, avg GPA 3.80
+            // Math: 2 students, avg GPA 3.35
+
+            // ToDictionary
+            var gpaLookup = students.ToDictionary(s => s.Name, s => s.GPA);
+            Console.WriteLine(gpaLookup["Alice"]);  // 3.9
+
+            // Distinct and Zip
+            var depts = students.Select(s => s.Dept).Distinct().OrderBy(d => d);
+            Console.WriteLine(string.Join(", ", depts));  // CS, Math
+
+            var names    = new[] { "Alice", "Bob", "Carol" };
+            var scores   = new[] { 92, 85, 88 };
+            var zipped   = names.Zip(scores, (n, s) => $"{n}:{s}");
+            Console.WriteLine(string.Join(", ", zipped));  // Alice:92, Bob:85, Carol:88
+
+            // SelectMany — flatten nested collections
+            var courses = new[]
+            {
+                new { Student = "Alice", Courses = new[] { "CS101", "Math" } },
+                new { Student = "Bob",   Courses = new[] { "CS101", "Physics" } },
+            };
+            var allCourses = courses.SelectMany(x => x.Courses).Distinct().OrderBy(c => c);
+            Console.WriteLine(string.Join(", ", allCourses)); // CS101, Math, Physics
+
+            // Top N per group
+            var topPerDept = students
+                .GroupBy(s => s.Dept)
+                .SelectMany(g => g.OrderByDescending(s => s.GPA).Take(1));
+            foreach (var s in topPerDept)
+                Console.WriteLine($"Top in {s.Dept}: {s.Name} ({s.GPA})");
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 19: Regular Expressions
+        // Concepts: Regex, Match, Groups, Replace, Compiled option
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example19_RegularExpressions()
+        {
+            Console.WriteLine("--- Example 19: Regular Expressions ---");
+
+            string text = "Contact support@example.com or sales@company.org for help.";
+
+            // IsMatch — quick boolean test
+            Console.WriteLine(Regex.IsMatch(text, @"\w+@\w+\.\w+"));  // True
+
+            // Matches — find all occurrences
+            var emailPattern = new Regex(@"[\w.+-]+@[\w-]+\.[a-zA-Z]{2,}",
+                                          RegexOptions.Compiled);
+            MatchCollection emails = emailPattern.Matches(text);
+            foreach (Match m in emails)
+                Console.WriteLine(m.Value);
+            // support@example.com
+            // sales@company.org
+
+            // Named groups
+            string date = "2025-03-15";
+            var datePattern = new Regex(@"(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})");
+            Match dm = datePattern.Match(date);
+            if (dm.Success)
+            {
+                Console.WriteLine(dm.Groups["year"].Value);   // 2025
+                Console.WriteLine(dm.Groups["month"].Value);  // 03
+                Console.WriteLine(dm.Groups["day"].Value);    // 15
+            }
+
+            // Replace with pattern
+            string messy = "too   many    spaces";
+            string clean = Regex.Replace(messy, @"\s+", " ");
+            Console.WriteLine(clean);   // too many spaces
+
+            // Replace with MatchEvaluator (dynamic replacement)
+            string sentence = "the quick brown fox";
+            string titled = Regex.Replace(sentence, @"\b\w",
+                m => m.Value.ToUpper());
+            Console.WriteLine(titled);  // The Quick Brown Fox
+
+            // Split
+            string csv = "apple, banana ,  cherry";
+            var parts = Regex.Split(csv, @"\s*,\s*");
+            Console.WriteLine(string.Join("|", parts));  // apple|banana|cherry
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 20: DateTime & TimeSpan
+        // Concepts: DateTime, TimeSpan, formatting, parsing, DateOnly (C# 10)
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example20_DateTimeAndTimeSpan()
+        {
+            Console.WriteLine("--- Example 20: DateTime & TimeSpan ---");
+
+            DateTime now = DateTime.Now;
+            DateTime utc = DateTime.UtcNow;
+
+            Console.WriteLine(now.ToString("yyyy-MM-dd HH:mm:ss")); // e.g. 2025-03-15 14:30:00
+            Console.WriteLine(now.DayOfWeek);    // e.g. Saturday
+            Console.WriteLine(now.ToString("D")); // long date format, culture-specific
+
+            // Parsing
+            var bday = DateTime.Parse("1995-07-04");
+            var bday2 = DateTime.ParseExact("04/07/1995", "dd/MM/yyyy", null);
+
+            // Arithmetic with TimeSpan
+            TimeSpan age = DateTime.Today - bday;
+            Console.WriteLine($"Age in days: {age.Days}");
+            Console.WriteLine($"Age in years: ~{age.Days / 365}");
+
+            DateTime nextWeek = now.AddDays(7);
+            DateTime nextYear = now.AddYears(1);
+            Console.WriteLine($"Next week: {nextWeek:yyyy-MM-dd}");
+
+            // TimeSpan creation
+            var ts = new TimeSpan(2, 30, 0);  // 2h 30m 0s
+            Console.WriteLine(ts.TotalMinutes);  // 150
+            Console.WriteLine(ts.ToString(@"hh\:mm"));  // 02:30
+
+            // DateOnly / TimeOnly (C# 10+ / .NET 6+)
+            var dateOnly = DateOnly.FromDateTime(now);
+            var timeOnly = TimeOnly.FromDateTime(now);
+            Console.WriteLine(dateOnly);  // 2025-03-15
+            Console.WriteLine(timeOnly);  // 14:30:00
+
+            // Stopwatch — precise elapsed time measurement
+            var sw = Stopwatch.StartNew();
+            var _ = Enumerable.Range(1, 1_000_000).Sum();
+            sw.Stop();
+            Console.WriteLine($"Elapsed: {sw.ElapsedMilliseconds}ms");
+        }
+    }
+
+    // =========================================================================
+    // TIER 3 — INTERMEDIATE (Examples 21–30)
+    // OOP, interfaces, generics, records, pattern matching
+    // =========================================================================
+    static class Tier3
+    {
+        public static void Run()
+        {
+            Example21_ClassesAndOOP();
+            Example22_InheritanceAndPolymorphism();
+            Example23_InterfacesAndExplicitImpl();
+            Example24_GenericsAndConstraints();
+            Example25_Records();
+            Example26_PatternMatchingAdvanced();
+            Example27_IteratorsAndYield();
+            Example28_ExtensionMethods();
+            Example29_IndexersAndOperatorOverloading();
+            Example30_IDisposableAndUsing();
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 21: Classes & OOP Fundamentals
+        // Concepts: constructors, properties, static members, object initializers
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example21_ClassesAndOOP()
+        {
+            Console.WriteLine("--- Example 21: Classes & OOP ---");
+
+            // Object initializer syntax
+            var alice = new BankAccount("Alice") { Balance = 1000 };
+            alice.Deposit(250);
+            alice.Withdraw(100);
+            Console.WriteLine(alice);   // PyBank | Alice | $1,150.00
+
+            // Static member
+            Console.WriteLine($"Total accounts: {BankAccount.TotalAccounts}"); // 1
+
+            var bob = new BankAccount("Bob", 500);
+            Console.WriteLine($"Total accounts: {BankAccount.TotalAccounts}"); // 2
+
+            // Auto-property with init-only setter (C# 9)
+            var product = new Product { Id = 1, Name = "Widget", Price = 9.99m };
+            // product.Price = 5;  // compile error — init-only!
+            Console.WriteLine(product);  // Product { Id = 1, Name = Widget, Price = 9.99 }
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 22: Inheritance & Polymorphism
+        // Concepts: virtual/override/sealed, base keyword, abstract methods
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example22_InheritanceAndPolymorphism()
+        {
+            Console.WriteLine("--- Example 22: Inheritance & Polymorphism ---");
+
+            var shapes = new List<Shape2>
+            {
+                new Circle2(5),
+                new Rectangle2(4, 6),
+                new Triangle(3, 4, 5)
+            };
+
+            foreach (Shape2 s in shapes)
+            {
+                // Polymorphic call — each shape computes its own area
+                Console.WriteLine($"{s.GetType().Name}: area={s.Area():F2}, " +
+                                  $"perimeter={s.Perimeter():F2}");
+            }
+            // Circle2:    area=78.54, perimeter=31.42
+            // Rectangle2: area=24.00, perimeter=20.00
+            // Triangle:   area=6.00,  perimeter=12.00
+
+            // is and as for type checking
+            Shape2 shape = new Circle2(3);
+            if (shape is Circle2 c)
+                Console.WriteLine($"It's a circle with radius {c.Radius}");
+
+            // base keyword — call parent method
+            var child = new Rectangle2(2, 3);
+            Console.WriteLine(child.Describe());  // calls base Describe + override
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 23: Interfaces & Explicit Implementation
+        // Concepts: IComparable, IEnumerable, explicit interface impl, default methods
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example23_InterfacesAndExplicitImpl()
+        {
+            Console.WriteLine("--- Example 23: Interfaces ---");
+
+            // IComparable<T> — allows sorting
+            var scores = new List<StudentScore>
+            {
+                new("Bob",   85),
+                new("Alice", 92),
+                new("Carol", 78),
+            };
+            scores.Sort();   // uses IComparable<StudentScore>
+            foreach (var s in scores)
+                Console.WriteLine($"{s.Name}: {s.Score}");
+            // Carol: 78 → Bob: 85 → Alice: 92
+
+            // Multiple interfaces
+            IPrintable p = new Document("Report", "Content here...");
+            p.Print();         // Printing: Report
+
+            ISaveable s2 = (ISaveable)p;
+            s2.Save("/tmp");   // Saved Report to /tmp
+
+            // Default interface method (C# 8+)
+            ILogger logger = new ConsoleLogger();
+            logger.Log("Hello");         // [INFO] Hello
+            logger.LogError("Oops");     // [ERROR] Oops  (calls default impl)
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 24: Generics & Constraints
+        // Concepts: generic class, generic method, where constraints, covariance
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example24_GenericsAndConstraints()
+        {
+            Console.WriteLine("--- Example 24: Generics ---");
+
+            // Generic Stack implementation
+            var stack = new MyStack<int>();
+            stack.Push(1);
+            stack.Push(2);
+            stack.Push(3);
+            Console.WriteLine(stack.Pop());   // 3
+            Console.WriteLine(stack.Peek());  // 2
+            Console.WriteLine(stack.Count);   // 2
+
+            // Works with any type
+            var strStack = new MyStack<string>();
+            strStack.Push("hello");
+            Console.WriteLine(strStack.Pop()); // hello
+
+            // Generic method
+            var ints    = new[] { 3, 1, 4, 1, 5, 9, 2 };
+            var strings = new[] { "banana", "apple", "cherry" };
+            Console.WriteLine(FindMax(ints));     // 9
+            Console.WriteLine(FindMax(strings));  // cherry
+
+            // Generic with new() constraint
+            var obj = CreateInstance<StringBuilder>();
+            obj.Append("created!");
+            Console.WriteLine(obj);  // created!
+
+            // Pair<T, U>
+            var pair = new Pair<string, int>("Alice", 95);
+            Console.WriteLine(pair);   // (Alice, 95)
+            var swapped = pair.Swap(); // (95, Alice)
+            Console.WriteLine(swapped);
+        }
+
+        // Generic method with IComparable constraint
+        static T FindMax<T>(IEnumerable<T> items) where T : IComparable<T>
+        {
+            T max = items.First();
+            foreach (T item in items)
+                if (item.CompareTo(max) > 0) max = item;
+            return max;
+        }
+
+        static T CreateInstance<T>() where T : new() => new T();
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 25: Records (C# 9+)
+        // Concepts: immutability, value equality, with expression, deconstruct
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example25_Records()
+        {
+            Console.WriteLine("--- Example 25: Records ---");
+
+            // Positional record — auto-generates constructor, properties, ToString, Equals
+            var alice = new PersonRecord("Alice", 30);
+            Console.WriteLine(alice);               // PersonRecord { Name = Alice, Age = 30 }
+
+            // Value equality (unlike classes which compare references)
+            var alice2 = new PersonRecord("Alice", 30);
+            Console.WriteLine(alice == alice2);     // True
+
+            // with expression — creates modified copy (non-destructive mutation)
+            var older = alice with { Age = 31 };
+            Console.WriteLine(older);               // PersonRecord { Name = Alice, Age = 31 }
+            Console.WriteLine(alice.Age);           // 30  (original unchanged)
+
+            // Deconstruction
+            var (name, age) = alice;
+            Console.WriteLine($"Name={name}, Age={age}");
+
+            // Inheritance between records
+            var emp = new EmployeeRecord("Bob", 25, "Engineering");
+            Console.WriteLine(emp);
+            // EmployeeRecord { Name = Bob, Age = 25, Department = Engineering }
+
+            // Record with custom members
+            var order = new OrderRecord(1001, "Widget", 3, 9.99m);
+            Console.WriteLine(order.Total);  // 29.97
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 26: Advanced Pattern Matching (C# 8–11)
+        // Concepts: property patterns, positional, list, recursive patterns
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example26_PatternMatchingAdvanced()
+        {
+            Console.WriteLine("--- Example 26: Advanced Pattern Matching ---");
+
+            // Property pattern
+            var alice = new PersonRecord("Alice", 17);
+            string category = alice switch
+            {
+                { Age: < 13 }  => "Child",
+                { Age: < 18 }  => "Teenager",
+                { Age: < 65 }  => "Adult",
+                _              => "Senior"
+            };
+            Console.WriteLine(category);  // Teenager
+
+            // Positional pattern (uses Deconstruct)
+            static string DescribePoint(System.Drawing.Point p) => p switch
+            {
+                (0, 0)    => "Origin",
+                (var x, 0) when x > 0 => "Positive X-axis",
+                (0, var y) when y > 0 => "Positive Y-axis",
+                _         => "Somewhere else"
+            };
+            Console.WriteLine(DescribePoint(new(0, 0)));   // Origin
+            Console.WriteLine(DescribePoint(new(5, 0)));   // Positive X-axis
+
+            // Type + property combination
+            object[] shapes = { new Circle2(5), new Rectangle2(3, 4), 42, "text" };
+            foreach (var item in shapes)
+            {
+                string desc = item switch
+                {
+                    Circle2 { Radius: > 3 } c    => $"Big circle r={c.Radius}",
+                    Circle2 c                    => $"Small circle r={c.Radius}",
+                    Rectangle2 { Width: var w, Height: var h } => $"Rect {w}×{h}",
+                    int n                        => $"Integer: {n}",
+                    _                            => "Unknown"
+                };
+                Console.WriteLine(desc);
+            }
+
+            // List pattern (C# 11)
+            int[] nums = { 1, 2, 3, 4, 5 };
+            bool matches = nums is [1, 2, ..];   // starts with 1, 2
+            Console.WriteLine(matches);  // True
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 27: Iterators & yield
+        // Concepts: IEnumerable<T>, yield return, yield break, lazy evaluation
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example27_IteratorsAndYield()
+        {
+            Console.WriteLine("--- Example 27: Iterators & yield ---");
+
+            // Consume a custom iterator
+            foreach (int n in CountUp(1, 5))
+                Console.Write(n + " ");   // 1 2 3 4 5
+            Console.WriteLine();
+
+            // Infinite sequence — safe with Take()
+            var firstTen = InfiniteCounter().Take(10).ToList();
+            Console.WriteLine(string.Join(", ", firstTen)); // 1, 2, ..., 10
+
+            // Fibonacci generator
+            var fibs = Fibonacci().Take(10).ToList();
+            Console.WriteLine(string.Join(", ", fibs)); // 0,1,1,2,3,5,8,13,21,34
+
+            // yield break — stop iteration early
+            foreach (int n in Range(1, 100, breakAt: 5))
+                Console.Write(n + " ");   // 1 2 3 4 5
+            Console.WriteLine();
+
+            // Lazy pipeline — nothing executes until iterated
+            var pipeline = InfiniteCounter()
+                .Where(n => n % 3 == 0)   // multiples of 3
+                .Select(n => n * n)        // squared
+                .Take(5);
+            Console.WriteLine(string.Join(", ", pipeline)); // 9, 36, 81, 144, 225
+        }
+
+        static IEnumerable<int> CountUp(int start, int stop)
+        {
+            for (int i = start; i <= stop; i++)
+                yield return i;   // suspends here, resumes on next MoveNext()
+        }
+
+        static IEnumerable<int> InfiniteCounter()
+        {
+            int n = 0;
+            while (true) yield return ++n;
+        }
+
+        static IEnumerable<int> Fibonacci()
+        {
+            int a = 0, b = 1;
+            while (true)
+            {
+                yield return a;
+                (a, b) = (b, a + b);
+            }
+        }
+
+        static IEnumerable<int> Range(int start, int stop, int breakAt)
+        {
+            for (int i = start; i <= stop; i++)
+            {
+                if (i > breakAt) yield break;
+                yield return i;
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 28: Extension Methods
+        // Concepts: static class, this parameter, extending sealed types
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example28_ExtensionMethods()
+        {
+            Console.WriteLine("--- Example 28: Extension Methods ---");
+
+            // Extending string (a sealed class!)
+            string sentence = "  hello, world!  ";
+            Console.WriteLine(sentence.TitleCase());   // Hello, World!
+            Console.WriteLine("".IsNullOrBlank());     // True
+            Console.WriteLine("abc".Repeat(3));        // abcabcabc
+
+            // Extending int
+            Console.WriteLine(5.IsEven());             // False
+            Console.WriteLine(4.IsEven());             // True
+            Console.WriteLine(5.Times(n => n * n));    // [1, 4, 9, 16, 25]
+
+            // Extending IEnumerable<T>
+            var numbers = new[] { 1, 2, 3, 4, 5 };
+            Console.WriteLine(string.Join(", ", numbers.TakeLast2(3))); // 3, 4, 5
+
+            // Fluent builder pattern enabled by extensions
+            Console.WriteLine(
+                "the quick brown fox"
+                    .TitleCase()
+                    .Replace(" ", "_")  // The_Quick_Brown_Fox
+            );
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 29: Indexers & Operator Overloading
+        // Concepts: this[int index], operator keyword, comparison operators
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example29_IndexersAndOperatorOverloading()
+        {
+            Console.WriteLine("--- Example 29: Indexers & Operator Overloading ---");
+
+            // Operator overloading on Vector2D
+            var v1 = new Vec(1, 2);
+            var v2 = new Vec(3, 4);
+
+            Console.WriteLine(v1 + v2);    // (4, 6)
+            Console.WriteLine(v2 - v1);    // (2, 2)
+            Console.WriteLine(v1 * 3);     // (3, 6)
+            Console.WriteLine(3 * v1);     // (3, 6)  (commutative via separate overload)
+            Console.WriteLine(v1 == new Vec(1, 2));  // True
+            Console.WriteLine(-v1);        // (-1, -2)  (unary negation)
+
+            // Custom indexer
+            var grid = new Grid(3, 3);
+            grid[0, 0] = "A";
+            grid[1, 1] = "B";
+            grid[2, 2] = "C";
+            Console.WriteLine(grid[1, 1]);  // B
+
+            // Implicit/explicit conversion operators
+            var m = new Meters(1000);
+            Kilometers km = m;             // implicit conversion
+            Console.WriteLine(km);         // 1 km
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 30: IDisposable, using, and Resource Management
+        // Concepts: Dispose pattern, using statement, using declaration (C# 8)
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example30_IDisposableAndUsing()
+        {
+            Console.WriteLine("--- Example 30: IDisposable & using ---");
+
+            // using statement — Dispose() called at end of block, even on exception
+            using (var conn = new FakeDbConnection("Server=localhost"))
+            {
+                conn.Open();
+                Console.WriteLine(conn.ExecuteQuery("SELECT 1")); // Result of: SELECT 1
+            }   // conn.Dispose() called here automatically
+            Console.WriteLine("Connection disposed.");
+
+            // using declaration (C# 8+) — disposed at end of enclosing scope
+            {
+                using var writer = new FakeWriter("/tmp/test.txt");
+                writer.Write("Hello");
+                writer.Write("World");
+            }   // writer.Dispose() called here
+
+            // Multiple resources
+            using var r1 = new FakeDbConnection("db1");
+            using var r2 = new FakeDbConnection("db2");
+            // both disposed in reverse order at end of scope
+
+            // IAsyncDisposable (C# 8+) — for async cleanup
+            // await using var asyncResource = new AsyncResource();
+        }
+    }
+
+    // =========================================================================
+    // TIER 4 — ADVANCED (Examples 31–40)
+    // Delegates, events, lambdas, async/await, Span<T>
+    // =========================================================================
+    static class Tier4
+    {
+        public static void Run()
+        {
+            Example31_DelegatesAndFuncAction();
+            Example32_EventsAndEventHandlers();
+            Example33_LambdasAndClosures();
+            Example34_ExpressionTrees();
+            Example35_AsyncAwait();
+            Example36_TaskParallelLibrary();
+            Example37_CancellationToken();
+            Example38_ChannelsAndProducerConsumer();
+            Example39_MemoryAndSpan();
+            Example40_UnsafeAndPointers();
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 31: Delegates, Func<T>, Action<T>, Predicate<T>
+        // Concepts: type-safe function pointers, multicast, built-in delegate types
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example31_DelegatesAndFuncAction()
+        {
+            Console.WriteLine("--- Example 31: Delegates, Func, Action ---");
+
+            // Named delegate type
+            MathOp add = (a, b) => a + b;
+            MathOp mul = (a, b) => a * b;
+            Console.WriteLine(add(3, 4));   // 7
+            Console.WriteLine(mul(3, 4));   // 12
+
+            // Func<TInput, TOutput> — built-in delegate returning a value
+            Func<double, double> square = x => x * x;
+            Func<double, double, double> power = Math.Pow;  // method group
+            Console.WriteLine(square(9));         // 81
+            Console.WriteLine(power(2, 10));      // 1024
+
+            // Action<T> — built-in delegate with no return value
+            Action<string> print = Console.WriteLine;
+            print("Hello from Action");
+
+            // Predicate<T> — built-in delegate returning bool
+            Predicate<int> isEven = n => n % 2 == 0;
+            Console.WriteLine(isEven(4));   // True
+
+            // Multicast delegate — chain multiple methods
+            Action<string> log = s => Console.WriteLine($"[LOG]  {s}");
+            Action<string> audit = s => Console.WriteLine($"[AUDIT] {s}");
+            Action<string> combined = log + audit;
+            combined("User logged in");
+            // [LOG]   User logged in
+            // [AUDIT] User logged in
+
+            // Higher-order function using Func
+            Console.WriteLine(ApplyTwice(square, 3)); // square(square(3)) = 81
+        }
+
+        delegate double MathOp(double a, double b);
+        static double ApplyTwice(Func<double, double> f, double x) => f(f(x));
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 32: Events & Event Handlers
+        // Concepts: event keyword, EventHandler<T>, custom EventArgs, unsubscribe
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example32_EventsAndEventHandlers()
+        {
+            Console.WriteLine("--- Example 32: Events ---");
+
+            var store = new OnlineStore();
+
+            // Subscribe with lambda
+            store.OrderPlaced += (sender, e) =>
+                Console.WriteLine($"Email: Order #{e.OrderId} placed for ${e.Amount:F2}");
+
+            // Subscribe with named method
+            store.OrderPlaced += LogOrder;
+
+            store.PlaceOrder(101, 49.99m);
+            // Email: Order #101 placed for $49.99
+            // LOG: Order #101 → $49.99
+
+            // Unsubscribe — remove a specific handler
+            store.OrderPlaced -= LogOrder;
+            store.PlaceOrder(102, 19.99m);
+            // Email: Order #102 placed for $19.99  (LogOrder no longer called)
+        }
+
+        static void LogOrder(object? sender, OrderEventArgs e) =>
+            Console.WriteLine($"LOG: Order #{e.OrderId} → ${e.Amount:F2}");
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 33: Lambdas & Closures
+        // Concepts: capturing variables, static lambdas, closure pitfalls
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example33_LambdasAndClosures()
+        {
+            Console.WriteLine("--- Example 33: Lambdas & Closures ---");
+
+            // Closure — lambda captures outer variable by reference
+            int multiplier = 3;
+            Func<int, int> triple = n => n * multiplier;  // captures 'multiplier'
+            Console.WriteLine(triple(7));   // 21
+            multiplier = 5;
+            Console.WriteLine(triple(7));   // 35  ← mutated! captures reference, not value
+
+            // Fix: capture by value with local copy
+            int factor = 3;
+            int localFactor = factor;   // local copy
+            Func<int, int> safe = n => n * localFactor;
+            factor = 99;
+            Console.WriteLine(safe(7));  // 21  ← unchanged
+
+            // Classic closure loop bug
+            var buggy = new List<Func<int>>();
+            for (int i = 0; i < 3; i++)
+                buggy.Add(() => i);  // all capture the same 'i'
+            // After loop, i == 3
+            Console.WriteLine(string.Join(", ", buggy.Select(f => f()))); // 3, 3, 3
+
+            // Fixed: capture loop variable with local copy
+            var fixed2 = new List<Func<int>>();
+            for (int i = 0; i < 3; i++)
+            {
+                int j = i;          // new variable each iteration
+                fixed2.Add(() => j);
+            }
+            Console.WriteLine(string.Join(", ", fixed2.Select(f => f()))); // 0, 1, 2
+
+            // static lambda (C# 9) — cannot capture outer variables, avoids accidental closure
+            Func<int, int> staticSq = static x => x * x;
+            Console.WriteLine(staticSq(7));  // 49
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 34: Expression Trees
+        // Concepts: Expression<Func<T>>, compile, inspect, modify (used in EF Core)
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example34_ExpressionTrees()
+        {
+            Console.WriteLine("--- Example 34: Expression Trees ---");
+
+            // Lambda vs Expression Tree
+            Func<int, int>              lambda = x => x * x;   // compiled code
+            System.Linq.Expressions.Expression<Func<int, int>> expr = x => x * x;   // data (AST)
+
+            // Inspect the tree
+            Console.WriteLine(expr);                      // x => (x * x)
+            Console.WriteLine(expr.Body);                 // (x * x)
+            Console.WriteLine(expr.Body.NodeType);        // Multiply
+            Console.WriteLine(expr.Parameters[0].Name);   // x
+
+            // Compile to executable delegate at runtime
+            Func<int, int> compiled = expr.Compile();
+            Console.WriteLine(compiled(9));               // 81
+
+            // Build expression tree programmatically (what ORM frameworks do)
+            var param = System.Linq.Expressions.Expression.Parameter(typeof(int), "n");
+            var body  = System.Linq.Expressions.Expression.Multiply(param, param);
+            var built = System.Linq.Expressions.Expression.Lambda<Func<int, int>>(body, param);
+            Console.WriteLine(built.Compile()(7));        // 49
+
+            // Practical: simulate Entity Framework "Where" translation
+            // Expression<Func<Student, bool>> filter = s => s.Age > 18;
+            // SQL translator inspects the tree → "WHERE Age > 18"
+            Console.WriteLine("Expression trees power EF Core, AutoMapper, and more.");
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 35: async / await
+        // Concepts: Task, Task<T>, async state machine, ConfigureAwait
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example35_AsyncAwait()
+        {
+            Console.WriteLine("--- Example 35: async/await ---");
+            RunAsyncDemo().GetAwaiter().GetResult();  // bridge sync → async for demo
+        }
+
+        static async Task RunAsyncDemo()
+        {
+            // Awaiting a single task
+            string result = await FetchDataAsync("https://api.example.com/data");
+            Console.WriteLine(result);  // Data from https://api.example.com/data
+
+            // Run tasks concurrently with Task.WhenAll
+            var sw = Stopwatch.StartNew();
+            Task<string>[] tasks =
+            {
+                FetchDataAsync("source1"),
+                FetchDataAsync("source2"),
+                FetchDataAsync("source3"),
+            };
+            string[] results = await Task.WhenAll(tasks);
+            sw.Stop();
+            Console.WriteLine($"3 concurrent fetches in {sw.ElapsedMilliseconds}ms");
+            foreach (var r in results) Console.WriteLine("  " + r);
+
+            // Task.WhenAny — first one to finish wins
+            var fastest = await Task.WhenAny(tasks);
+            Console.WriteLine("Fastest: " + await fastest);
+
+            // Async exception handling
+            try
+            {
+                await FailingTaskAsync();
+            }
+            catch (InvalidOperationException ex)
+            {
+                Console.WriteLine($"Caught async exception: {ex.Message}");
+            }
+
+            // ValueTask — avoids heap allocation when result is often synchronous
+            int val = await GetValueAsync(true);
+            Console.WriteLine($"ValueTask result: {val}");  // 42
+        }
+
+        static async Task<string> FetchDataAsync(string url)
+        {
+            await Task.Delay(50);   // simulate network latency
+            return $"Data from {url}";
+        }
+
+        static async Task FailingTaskAsync()
+        {
+            await Task.Delay(10);
+            throw new InvalidOperationException("Something went wrong async");
+        }
+
+        static ValueTask<int> GetValueAsync(bool cached) =>
+            cached ? new ValueTask<int>(42) : new ValueTask<int>(Task.Run(() => 42));
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 36: Task Parallel Library (TPL)
+        // Concepts: Parallel.For, Parallel.ForEach, PLINQ, Task.Run
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example36_TaskParallelLibrary()
+        {
+            Console.WriteLine("--- Example 36: Task Parallel Library ---");
+
+            // Parallel.For — CPU-bound work in parallel
+            long[] results = new long[10];
+            Parallel.For(0, 10, i =>
+            {
+                results[i] = SumOfSquares(i * 100_000, (i + 1) * 100_000);
+            });
+            Console.WriteLine($"Results computed: {results.Length}");
+
+            // Parallel.ForEach
+            var files = Enumerable.Range(1, 5).Select(i => $"file{i}.txt").ToList();
+            Parallel.ForEach(files, file =>
+            {
+                // Simulate CPU-bound processing
+                Thread.Sleep(10);
+                Console.WriteLine($"  Processed {file} on thread {Thread.CurrentThread.ManagedThreadId}");
+            });
+
+            // PLINQ — parallel LINQ
+            var sw = Stopwatch.StartNew();
+            long sum = Enumerable.Range(1, 10_000_000)
+                .AsParallel()           // parallel execution
+                .Where(n => n % 2 == 0)
+                .Sum(n => (long)n);
+            Console.WriteLine($"PLINQ sum={sum}, time={sw.ElapsedMilliseconds}ms");
+
+            // Task.Run — offload to ThreadPool
+            var task = Task.Run(() => SumOfSquares(0, 1_000_000));
+            Console.WriteLine($"Background result: {task.Result}");
+        }
+
+        static long SumOfSquares(int from, int to)
+        {
+            long sum = 0;
+            for (int i = from; i < to; i++) sum += (long)i * i;
+            return sum;
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 37: CancellationToken
+        // Concepts: CancellationTokenSource, cooperative cancellation, linked tokens
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example37_CancellationToken()
+        {
+            Console.WriteLine("--- Example 37: CancellationToken ---");
+            RunCancellationDemo().GetAwaiter().GetResult();
+        }
+
+        static async Task RunCancellationDemo()
+        {
+            // Create a token that cancels after 200ms
+            using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(200));
+            CancellationToken token = cts.Token;
+
+            try
+            {
+                await LongRunningOperationAsync(token);
+                Console.WriteLine("Operation completed.");
+            }
+            catch (OperationCanceledException)
+            {
+                Console.WriteLine("Operation was cancelled!");   // prints
+            }
+
+            // Manual cancellation
+            using var cts2 = new CancellationTokenSource();
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(100);
+                cts2.Cancel();   // cancel from another thread
+            });
+
+            try
+            {
+                await Task.Delay(5000, cts2.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                Console.WriteLine("Task.Delay cancelled by token");
+            }
+
+            // Linked tokens — cancel if EITHER source cancels
+            using var cts3 = new CancellationTokenSource();
+            using var cts4 = new CancellationTokenSource(300);
+            using var linked = CancellationTokenSource.CreateLinkedTokenSource(
+                cts3.Token, cts4.Token);
+        }
+
+        static async Task LongRunningOperationAsync(CancellationToken token)
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                token.ThrowIfCancellationRequested();   // cooperative check
+                await Task.Delay(50, token);
+                Console.WriteLine($"  Step {i + 1}/10");
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 38: Channels (Producer/Consumer Pattern)
+        // Concepts: Channel<T>, bounded/unbounded, async producer-consumer pipeline
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example38_ChannelsAndProducerConsumer()
+        {
+            Console.WriteLine("--- Example 38: Channels ---");
+            RunChannelDemo().GetAwaiter().GetResult();
+        }
+
+        static async Task RunChannelDemo()
+        {
+            // Unbounded channel
+            var channel = System.Threading.Channels.Channel.CreateUnbounded<int>();
+            var writer  = channel.Writer;
+            var reader  = channel.Reader;
+
+            // Producer
+            var producer = Task.Run(async () =>
+            {
+                for (int i = 1; i <= 5; i++)
+                {
+                    await writer.WriteAsync(i);
+                    await Task.Delay(20);
+                }
+                writer.Complete();   // signal: no more items
+            });
+
+            // Consumer
+            var consumer = Task.Run(async () =>
+            {
+                await foreach (int item in reader.ReadAllAsync())
+                    Console.WriteLine($"  Consumed: {item}");
+            });
+
+            await Task.WhenAll(producer, consumer);
+
+            // Bounded channel — applies backpressure when full
+            var bounded = System.Threading.Channels.Channel.CreateBounded<string>(
+                new System.Threading.Channels.BoundedChannelOptions(5)
+                {
+                    FullMode = System.Threading.Channels.BoundedChannelFullMode.Wait
+                });
+            Console.WriteLine("Channel demo complete.");
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 39: Memory<T> and Span<T>
+        // Concepts: zero-copy slicing, stack allocation, stackalloc, performance
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example39_MemoryAndSpan()
+        {
+            Console.WriteLine("--- Example 39: Span<T> & Memory<T> ---");
+
+            // Span<T> — stack-only, zero-copy slice over contiguous memory
+            int[] arr = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+            Span<int> span   = arr.AsSpan();
+            Span<int> middle = span[2..8];         // slice indexes 2-7
+
+            // Modifying span modifies underlying array (no copy)
+            middle[0] = 99;
+            Console.WriteLine(arr[2]);             // 99
+
+            // Span over string (ReadOnlySpan<char>) — no allocation
+            ReadOnlySpan<char> str = "Hello, World!".AsSpan();
+            ReadOnlySpan<char> word = str[0..5];
+            Console.WriteLine(new string(word));   // Hello
+
+            // stackalloc — allocate on stack, no GC pressure
+            Span<int> stackArray = stackalloc int[10];
+            for (int i = 0; i < 10; i++) stackArray[i] = i * i;
+            Console.WriteLine(stackArray[3]);      // 9
+
+            // Memory<T> — heap-based, can be stored in fields (unlike Span)
+            Memory<int> memory = arr.AsMemory(0, 5);
+            Console.WriteLine(memory.Length);      // 5
+
+            // Practical: parse CSV without allocations
+            ReadOnlySpan<char> csv = "Alice,30,Engineer".AsSpan();
+            int first  = csv.IndexOf(',');
+            var name   = csv[..first];
+            var rest   = csv[(first + 1)..];
+            int second = rest.IndexOf(',');
+            var age    = rest[..second];
+            Console.WriteLine($"Name={new string(name)}, Age={new string(age)}");
+            // Name=Alice, Age=30
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 40: Unsafe Code & Pointers (Advanced/Systems Programming)
+        // Concepts: unsafe keyword, fixed, pointer arithmetic, interop
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example40_UnsafeAndPointers()
+        {
+            Console.WriteLine("--- Example 40: Unsafe Code & Pointers ---");
+            // NOTE: Requires <AllowUnsafeBlocks>true</AllowUnsafeBlocks> in .csproj
+
+            unsafe
+            {
+                // Pointer to a value type
+                int value = 42;
+                int* ptr = &value;               // address of value
+                Console.WriteLine(*ptr);         // 42  (dereference)
+                *ptr = 100;
+                Console.WriteLine(value);        // 100  (value changed via pointer)
+
+                // Pointer arithmetic
+                int[] numbers = { 1, 2, 3, 4, 5 };
+                fixed (int* pArr = numbers)      // pin array in memory during pointer use
+                {
+                    for (int i = 0; i < numbers.Length; i++)
+                        Console.Write(*(pArr + i) + " ");  // 1 2 3 4 5
+                }
+                Console.WriteLine();
+
+                // sizeof in unsafe context (works for any type)
+                Console.WriteLine($"sizeof(double) = {sizeof(double)}");  // 8
+            }
+            // NOTE: Unsafe code bypasses the GC and can cause memory corruption.
+            // Use only for P/Invoke, performance-critical inner loops, or interop.
+        }
+    }
+
+    // =========================================================================
+    // TIER 5 — EXPERT (Examples 41–50)
+    // Reflection, attributes, source generators, DI, advanced patterns
+    // =========================================================================
+    static class Tier5
+    {
+        public static void Run()
+        {
+            Example41_ReflectionAndTypeInfo();
+            Example42_CustomAttributes();
+            Example43_DependencyInjection();
+            Example44_OptionsPattern();
+            Example45_ImmutableCollections();
+            Example46_MemoryEfficientJSON();
+            Example47_SingletonAndFactory();
+            Example48_ObserverAndMediator();
+            Example49_PipelineBuilderPattern();
+            Example50_ComprehensiveSystemDemo();
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 41: Reflection & Type Inspection
+        // Concepts: Type, MethodInfo, PropertyInfo, late binding, dynamic invocation
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example41_ReflectionAndTypeInfo()
+        {
+            Console.WriteLine("--- Example 41: Reflection ---");
+
+            Type t = typeof(BankAccount);
+            Console.WriteLine(t.FullName);    // Examples.BankAccount
+
+            // Properties
+            foreach (var prop in t.GetProperties())
+                Console.WriteLine($"  Property: {prop.Name} ({prop.PropertyType.Name})");
+
+            // Methods
+            foreach (var method in t.GetMethods(BindingFlags.Public | BindingFlags.Instance |
+                                                BindingFlags.DeclaredOnly))
+                Console.WriteLine($"  Method: {method.Name}");
+
+            // Create instance dynamically
+            object? instance = Activator.CreateInstance(t, "ReflectionUser");
+            Console.WriteLine(instance);  // PyBank | ReflectionUser | $0.00
+
+            // Invoke method dynamically
+            MethodInfo? deposit = t.GetMethod("Deposit");
+            deposit?.Invoke(instance, new object[] { 500.0 });
+
+            // Get/Set property dynamically
+            PropertyInfo? balance = t.GetProperty("Balance");
+            Console.WriteLine(balance?.GetValue(instance));  // 500
+
+            // Generic reflection
+            Type listType = typeof(List<>).MakeGenericType(typeof(string));
+            object? list = Activator.CreateInstance(listType);
+            listType.GetMethod("Add")?.Invoke(list, new object[] { "hello" });
+            Console.WriteLine(listType.GetProperty("Count")?.GetValue(list)); // 1
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 42: Custom Attributes & Metadata
+        // Concepts: [AttributeUsage], custom Attribute class, reflection-based processing
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example42_CustomAttributes()
+        {
+            Console.WriteLine("--- Example 42: Custom Attributes ---");
+
+            // Read attributes via reflection
+            var type = typeof(ApiController);
+
+            // Class-level attribute
+            var route = type.GetCustomAttribute<RouteAttribute>();
+            Console.WriteLine($"Route: {route?.Path}");  // Route: /api/users
+
+            // Method-level attributes
+            foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.Instance |
+                                                    BindingFlags.DeclaredOnly))
+            {
+                var httpGet = method.GetCustomAttribute<HttpGetAttribute>();
+                var auth    = method.GetCustomAttribute<RequiresAuthAttribute>();
+                if (httpGet != null)
+                    Console.WriteLine($"  GET {httpGet.Template} — auth required: {auth != null}");
+            }
+
+            // Validate object using [Required] and [Range] custom attributes
+            var user = new UserModel { Name = "", Age = -5 };
+            var errors = AttributeValidator.Validate(user);
+            foreach (var e in errors)
+                Console.WriteLine($"  Validation: {e}");
+            // Validation: Name is required.
+            // Validation: Age must be between 0 and 150.
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 43: Dependency Injection (Manual DI Container)
+        // Concepts: IServiceCollection pattern, transient/singleton, constructor injection
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example43_DependencyInjection()
+        {
+            Console.WriteLine("--- Example 43: Dependency Injection ---");
+
+            // Manual DI Container
+            var container = new SimpleContainer();
+            container.RegisterSingleton<IMessageService, EmailService>();
+            container.Register<IOrderService, OrderService>();
+            container.Register<ILogger2, ConsoleLogger2>();
+
+            // Resolve — constructor injection handled automatically
+            var orderService = container.Resolve<IOrderService>();
+            orderService.PlaceOrder("Widget", 2);
+            // [LOG] Placing order: 2x Widget
+            // [EMAIL] Order confirmed: 2x Widget
+
+            // Prove singleton behavior
+            var s1 = container.Resolve<IMessageService>();
+            var s2 = container.Resolve<IMessageService>();
+            Console.WriteLine(ReferenceEquals(s1, s2));  // True — same instance
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 44: Options Pattern & Configuration
+        // Concepts: strongly-typed options, IOptions<T>, validation
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example44_OptionsPattern()
+        {
+            Console.WriteLine("--- Example 44: Options Pattern ---");
+
+            // Simulate loading configuration (normally from appsettings.json)
+            var dbOptions = new DatabaseOptions
+            {
+                ConnectionString = "Server=localhost;Database=mydb",
+                MaxConnections   = 20,
+                TimeoutSeconds   = 30
+            };
+
+            // Validate options
+            var errors = dbOptions.Validate();
+            if (!errors.Any())
+                Console.WriteLine("Options valid.");
+
+            // Repository using injected options
+            var repo = new UserRepository(dbOptions);
+            Console.WriteLine(repo.FindUser(1));  // User #1 from Server=localhost;Database=mydb
+
+            // Typed options enable easy unit testing — swap connection string in tests
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 45: Immutable Collections
+        // Concepts: ImmutableList, ImmutableDictionary, thread safety, persistent data
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example45_ImmutableCollections()
+        {
+            Console.WriteLine("--- Example 45: Immutable Collections ---");
+
+            // Requires: using System.Collections.Immutable (NuGet: System.Collections.Immutable)
+            // For demo we show the pattern using readonly and records
+
+            // Immutable-style pattern with records
+            var state1 = new AppState(
+                Users: new[] { "Alice", "Bob" }.ToList().AsReadOnly(),
+                Count: 2
+            );
+
+            // "Mutation" creates a new instance — original is unchanged
+            var state2 = state1 with
+            {
+                Users = state1.Users.Append("Carol").ToList().AsReadOnly(),
+                Count = state1.Count + 1
+            };
+
+            Console.WriteLine($"State1: {state1.Count} users");   // 2
+            Console.WriteLine($"State2: {state2.Count} users");   // 3
+            Console.WriteLine(string.Join(", ", state2.Users));   // Alice, Bob, Carol
+
+            // ConcurrentDictionary — thread-safe mutable alternative
+            var concDict = new ConcurrentDictionary<string, int>();
+            Parallel.For(0, 1000, i =>
+            {
+                concDict.AddOrUpdate("counter", 1, (key, old) => old + 1);
+            });
+            Console.WriteLine($"Concurrent counter: {concDict["counter"]}"); // 1000
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 46: High-Performance JSON with System.Text.Json
+        // Concepts: JsonSerializer, source gen, Utf8JsonWriter, custom converters
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example46_MemoryEfficientJSON()
+        {
+            Console.WriteLine("--- Example 46: System.Text.Json ---");
+
+            // Serialize to JSON string
+            var person = new JsonPerson { Name = "Alice", Age = 30, Tags = new[] { "vip", "premium" } };
+            var options = new JsonSerializerOptions { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+            string json = JsonSerializer.Serialize(person, options);
+            Console.WriteLine(json);
+
+            // Deserialize
+            var loaded = JsonSerializer.Deserialize<JsonPerson>(json, options);
+            Console.WriteLine($"Loaded: {loaded?.Name}, tags: {loaded?.Tags?.Length}");
+
+            // Serialize to UTF-8 bytes (zero-copy, no intermediate string)
+            byte[] bytes = JsonSerializer.SerializeToUtf8Bytes(person, options);
+            Console.WriteLine($"JSON size: {bytes.Length} bytes");
+
+            // Low-level Utf8JsonWriter for maximum performance
+            using var ms = new MemoryStream();
+            using var writer = new System.Text.Json.Utf8JsonWriter(ms, new System.Text.Json.JsonWriterOptions { Indented = false });
+            writer.WriteStartObject();
+            writer.WriteString("name", "Bob");
+            writer.WriteNumber("age", 25);
+            writer.WriteEndObject();
+            writer.Flush();
+            Console.WriteLine(Encoding.UTF8.GetString(ms.ToArray())); // {"name":"Bob","age":25}
+
+            // JsonDocument — read-only DOM for selective parsing
+            using var doc = JsonDocument.Parse(json);
+            string? name = doc.RootElement.GetProperty("name").GetString();
+            Console.WriteLine($"DOM parse: {name}");  // Alice
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 47: Singleton & Abstract Factory Patterns
+        // Concepts: thread-safe singleton with Lazy<T>, abstract factory
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example47_SingletonAndFactory()
+        {
+            Console.WriteLine("--- Example 47: Singleton & Factory ---");
+
+            // Thread-safe Singleton using Lazy<T>
+            var db1 = AppDatabase.Instance;
+            var db2 = AppDatabase.Instance;
+            Console.WriteLine(ReferenceEquals(db1, db2));   // True
+            Console.WriteLine(db1.ConnectionId);
+
+            // Abstract Factory — create families of related objects
+            IUIFactory winFactory  = new WindowsUIFactory();
+            IUIFactory macFactory  = new MacUIFactory();
+
+            RenderUI(winFactory);   // Windows Button | Windows TextBox
+            RenderUI(macFactory);   // Mac Button     | Mac TextBox
+        }
+
+        static void RenderUI(IUIFactory factory)
+        {
+            var button  = factory.CreateButton();
+            var textbox = factory.CreateTextBox();
+            Console.WriteLine($"{button.Render()} | {textbox.Render()}");
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 48: Observer Pattern & Mediator
+        // Concepts: IObservable<T>/IObserver<T>, Reactive Extensions style
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example48_ObserverAndMediator()
+        {
+            Console.WriteLine("--- Example 48: Observer & Mediator ---");
+
+            // Custom IObservable<T> implementation
+            var bus = new EventBus2<OrderEvent>();
+
+            // Subscribe multiple observers
+            bus.Subscribe(new EmailNotifier());
+            bus.Subscribe(new InventoryUpdater());
+            IDisposable sub = bus.Subscribe(new AuditLogger());
+
+            bus.Publish(new OrderEvent { OrderId = 101, Amount = 49.99m });
+            // Email: Order #101 placed ($49.99)
+            // Inventory: reducing stock for Order #101
+            // Audit: Order #101 logged at ...
+
+            // Unsubscribe
+            sub.Dispose();
+            bus.Publish(new OrderEvent { OrderId = 102, Amount = 9.99m });
+            // AuditLogger no longer receives events
+
+            // Simple Mediator pattern
+            var mediator = new SimpleMediator();
+            mediator.Register<CreateUserCommand>(cmd =>
+                Console.WriteLine($"Handler: Creating user '{cmd.Name}'"));
+            mediator.Register<DeleteUserCommand>(cmd =>
+                Console.WriteLine($"Handler: Deleting user {cmd.UserId}"));
+
+            mediator.Send(new CreateUserCommand { Name = "Alice" });
+            mediator.Send(new DeleteUserCommand { UserId = 42 });
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 49: Pipeline Builder Pattern (Middleware)
+        // Concepts: chain of responsibility, ASP.NET Core–style middleware pipeline
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example49_PipelineBuilderPattern()
+        {
+            Console.WriteLine("--- Example 49: Pipeline Builder ---");
+
+            var pipeline = new PipelineBuilder<RequestContext>()
+                .Use(async (ctx, next) =>
+                {
+                    Console.WriteLine($"[Auth] Checking token for {ctx.Path}");
+                    if (ctx.Headers.ContainsKey("Authorization"))
+                    {
+                        await next(ctx);
+                    }
+                    else
+                    {
+                        ctx.Response = "401 Unauthorized";
+                    }
+                })
+                .Use(async (ctx, next) =>
+                {
+                    var sw = Stopwatch.StartNew();
+                    await next(ctx);
+                    Console.WriteLine($"[Timing] {ctx.Path} took {sw.ElapsedMilliseconds}ms");
+                })
+                .Use(async (ctx, next) =>
+                {
+                    Console.WriteLine($"[Handler] Processing {ctx.Path}");
+                    ctx.Response = $"200 OK: {ctx.Path}";
+                    await next(ctx);
+                })
+                .Build();
+
+            var ctx1 = new RequestContext("/api/users", new() { ["Authorization"] = "Bearer token" });
+            pipeline(ctx1).GetAwaiter().GetResult();
+            Console.WriteLine(ctx1.Response);
+            // [Auth] Checking token for /api/users
+            // [Timing] /api/users took Xms
+            // [Handler] Processing /api/users
+            // 200 OK: /api/users
+
+            var ctx2 = new RequestContext("/api/secret", new());
+            pipeline(ctx2).GetAwaiter().GetResult();
+            Console.WriteLine(ctx2.Response);  // 401 Unauthorized
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Example 50: Comprehensive System — Domain-Driven E-Commerce Demo
+        // Combines: records, generics, async, LINQ, events, patterns, Result<T>
+        // ─────────────────────────────────────────────────────────────────────
+        static void Example50_ComprehensiveSystemDemo()
+        {
+            Console.WriteLine("--- Example 50: Comprehensive System Demo ---");
+            RunEcommerceDemo().GetAwaiter().GetResult();
+        }
+
+        static async Task RunEcommerceDemo()
+        {
+            // Strongly-typed domain models (records)
+            var catalog = new ProductCatalog();
+            catalog.AddProduct(new DomainProduct(1, "Widget",   9.99m,  100));
+            catalog.AddProduct(new DomainProduct(2, "Gadget",   24.99m, 50));
+            catalog.AddProduct(new DomainProduct(3, "Doohickey", 4.99m, 200));
+
+            // Result<T> pattern — explicit error handling without exceptions
+            var result = await catalog.PlaceOrderAsync(new OrderRequest(
+                CustomerId: "C001",
+                Items: new[]
+                {
+                    new OrderItem(ProductId: 1, Quantity: 3),
+                    new OrderItem(ProductId: 2, Quantity: 1),
+                }
+            ));
+
+            result.Match(
+                onSuccess: order =>
+                {
+                    Console.WriteLine($"Order {order.Id} placed!");
+                    Console.WriteLine($"Total: {order.Total:C}");
+                    Console.WriteLine($"Items: {order.Items.Length}");
+                    foreach (var item in order.Items)
+                        Console.WriteLine($"  {item.Name} x{item.Qty} @ {item.UnitPrice:C}");
+                },
+                onFailure: error =>
+                {
+                    Console.WriteLine($"Order failed: {error}");
+                }
+            );
+
+            // LINQ reporting — top products by revenue
+            Console.WriteLine("\n--- Revenue Report ---");
+            var report = catalog.GetRevenueReport()
+                .OrderByDescending(r => r.Revenue)
+                .Take(3);
+            foreach (var (name, units, revenue) in report)
+                Console.WriteLine($"  {name,-12} | {units,3} units | {revenue,8:C}");
+
+            // Failed order — insufficient stock
+            var failResult = await catalog.PlaceOrderAsync(new OrderRequest(
+                CustomerId: "C002",
+                Items: new[] { new OrderItem(1, 9999) }   // too many
+            ));
+            failResult.Match(
+                onSuccess: _ => Console.WriteLine("Should not succeed"),
+                onFailure: error => Console.WriteLine($"Expected failure: {error}")
+            );
+        }
+    }
+
+    // =========================================================================
+    // SUPPORTING TYPES (used by the examples above)
+    // =========================================================================
+
+    // Example 15 — Custom exception
+    class InvalidAgeException : Exception
+    {
+        public int Age { get; }
+        public InvalidAgeException(int age)
+            : base($"Invalid age: {age}. Must be 0–150.") => Age = age;
+    }
+
+    // Example 21 — BankAccount
+    class BankAccount
+    {
+        public static int TotalAccounts { get; private set; }
+        public string Owner { get; }
+        public double Balance { get; set; }
+        private static readonly string BankName = "PyBank";
+
+        public BankAccount(string owner, double balance = 0)
+        {
+            Owner = owner;
+            Balance = balance;
+            TotalAccounts++;
+        }
+
+        public void Deposit(double amount)
+        {
+            if (amount <= 0) throw new ArgumentException("Must be positive.");
+            Balance += amount;
+            Console.WriteLine($"Deposited {amount:C}. New balance: {Balance:C}");
+        }
+
+        public void Withdraw(double amount)
+        {
+            if (amount > Balance) throw new InvalidOperationException("Insufficient funds.");
+            Balance -= amount;
+            Console.WriteLine($"Withdrew {amount:C}. New balance: {Balance:C}");
+        }
+
+        public override string ToString() => $"{BankName} | {Owner} | {Balance:C}";
+    }
+
+    record Product
+    {
+        public int Id { get; init; }
+        public string Name { get; init; } = "";
+        public decimal Price { get; init; }
+        public override string ToString() => $"Product {{ Id = {Id}, Name = {Name}, Price = {Price} }}";
+    }
+
+    // Example 22 — Shapes
+    abstract class Shape2
+    {
+        public abstract double Area();
+        public abstract double Perimeter();
+        public virtual string Describe() => $"I am a {GetType().Name}";
+    }
+
+    class Circle2 : Shape2
+    {
+        public double Radius { get; }
+        public Circle2(double r) => Radius = r;
+        public override double Area() => Math.PI * Radius * Radius;
+        public override double Perimeter() => 2 * Math.PI * Radius;
+    }
+
+    class Rectangle2 : Shape2
+    {
+        public double Width { get; }
+        public double Height { get; }
+        public Rectangle2(double w, double h) { Width = w; Height = h; }
+        public override double Area() => Width * Height;
+        public override double Perimeter() => 2 * (Width + Height);
+        public override string Describe() => base.Describe() + $" ({Width}×{Height})";
+    }
+
+    class Triangle : Shape2
+    {
+        double _a, _b, _c;
+        public Triangle(double a, double b, double c) { _a = a; _b = b; _c = c; }
+        public override double Perimeter() => _a + _b + _c;
+        public override double Area()
+        {
+            double s = Perimeter() / 2;
+            return Math.Sqrt(s * (s - _a) * (s - _b) * (s - _c));
+        }
+    }
+
+    // Example 23 — Interfaces
+    record StudentScore(string Name, int Score) : IComparable<StudentScore>
+    {
+        public int CompareTo(StudentScore? other) => Score.CompareTo(other?.Score);
+    }
+
+    interface IPrintable { void Print(); }
+    interface ISaveable  { void Save(string path); }
+
+    class Document : IPrintable, ISaveable
+    {
+        public string Title { get; }
+        string _content;
+        public Document(string title, string content) { Title = title; _content = content; }
+        public void Print() => Console.WriteLine($"Printing: {Title}");
+        public void Save(string path) => Console.WriteLine($"Saved {Title} to {path}");
+    }
+
+    interface ILogger
+    {
+        void Log(string message);
+        void LogError(string message) => Log($"[ERROR] {message}");  // default impl
+    }
+
+    class ConsoleLogger : ILogger
+    {
+        public void Log(string message) => Console.WriteLine($"[INFO] {message}");
+    }
+
+    // Example 24 — Generic Stack and Pair
+    class MyStack<T>
+    {
+        private readonly List<T> _items = new();
+        public int Count => _items.Count;
+        public void Push(T item) => _items.Add(item);
+        public T Pop()
+        {
+            if (Count == 0) throw new InvalidOperationException("Stack is empty.");
+            T top = _items[^1];
+            _items.RemoveAt(Count - 1);
+            return top;
+        }
+        public T Peek() => Count > 0 ? _items[^1] : throw new InvalidOperationException("Stack is empty.");
+    }
+
+    class Pair<T1, T2>
+    {
+        public T1 First { get; }
+        public T2 Second { get; }
+        public Pair(T1 first, T2 second) { First = first; Second = second; }
+        public Pair<T2, T1> Swap() => new(Second, First);
+        public override string ToString() => $"({First}, {Second})";
+    }
+
+    // Example 25 — Records
+    record PersonRecord(string Name, int Age);
+    record EmployeeRecord(string Name, int Age, string Department) : PersonRecord(Name, Age);
+
+    record OrderRecord(int Id, string Product, int Quantity, decimal UnitPrice)
+    {
+        public decimal Total => Quantity * UnitPrice;
+    }
+
+    // Example 28 — Extension Methods
+    static class StringExtensions
+    {
+        public static string TitleCase(this string s) =>
+            string.Join(" ", s.Trim().Split(' ')
+                .Select(word => word.Length > 0
+                    ? char.ToUpper(word[0]) + word[1..].ToLower()
+                    : word));
+
+        public static bool IsNullOrBlank(this string? s) => string.IsNullOrWhiteSpace(s);
+
+        public static string Repeat(this string s, int times) =>
+            string.Concat(Enumerable.Repeat(s, times));
+    }
+
+    static class IntExtensions
+    {
+        public static bool IsEven(this int n) => n % 2 == 0;
+
+        public static IEnumerable<int> Times(this int n, Func<int, int> f) =>
+            Enumerable.Range(1, n).Select(f);
+    }
+
+    static class EnumerableExtensions
+    {
+        public static IEnumerable<T> TakeLast2<T>(this IEnumerable<T> source, int count) =>
+            source.Skip(Math.Max(0, source.Count() - count));
+    }
+
+    // Example 29 — Vec, Grid, Meters/Kilometers
+    struct Vec
+    {
+        public double X, Y;
+        public Vec(double x, double y) { X = x; Y = y; }
+        public static Vec operator +(Vec a, Vec b) => new(a.X + b.X, a.Y + b.Y);
+        public static Vec operator -(Vec a, Vec b) => new(a.X - b.X, a.Y - b.Y);
+        public static Vec operator *(Vec v, double s) => new(v.X * s, v.Y * s);
+        public static Vec operator *(double s, Vec v) => v * s;
+        public static Vec operator -(Vec v) => new(-v.X, -v.Y);
+        public static bool operator ==(Vec a, Vec b) => a.X == b.X && a.Y == b.Y;
+        public static bool operator !=(Vec a, Vec b) => !(a == b);
+        public override bool Equals(object? obj) => obj is Vec v && this == v;
+        public override int GetHashCode() => HashCode.Combine(X, Y);
+        public override string ToString() => $"({X}, {Y})";
+    }
+
+    class Grid
+    {
+        private readonly string?[,] _cells;
+        public Grid(int rows, int cols) => _cells = new string?[rows, cols];
+        public string? this[int row, int col]
+        {
+            get => _cells[row, col];
+            set => _cells[row, col] = value;
+        }
+    }
+
+    struct Meters
+    {
+        public double Value { get; }
+        public Meters(double v) => Value = v;
+        public static implicit operator Kilometers(Meters m) => new(m.Value / 1000);
+    }
+
+    struct Kilometers
+    {
+        public double Value { get; }
+        public Kilometers(double v) => Value = v;
+        public override string ToString() => $"{Value} km";
+    }
+
+    // Example 30 — IDisposable helpers
+    class FakeDbConnection : IDisposable
+    {
+        string _cs; bool _disposed;
+        public FakeDbConnection(string cs) { _cs = cs; Console.WriteLine($"  Created connection: {cs}"); }
+        public void Open() => Console.WriteLine($"  Opened: {_cs}");
+        public string ExecuteQuery(string sql) => $"Result of: {sql}";
+        public void Dispose() { if (!_disposed) { Console.WriteLine($"  Disposed: {_cs}"); _disposed = true; } }
+    }
+
+    class FakeWriter : IDisposable
+    {
+        string _path;
+        public FakeWriter(string p) { _path = p; Console.WriteLine($"  Writer opened: {p}"); }
+        public void Write(string s) => Console.WriteLine($"  Write: {s}");
+        public void Dispose() => Console.WriteLine($"  Writer closed: {_path}");
+    }
+
+    // Example 32 — Events
+    class OrderEventArgs : EventArgs
+    {
+        public int OrderId { get; init; }
+        public decimal Amount { get; init; }
+    }
+
+    class OnlineStore
+    {
+        public event EventHandler<OrderEventArgs>? OrderPlaced;
+
+        public void PlaceOrder(int id, decimal amount)
+        {
+            Console.WriteLine($"Processing order #{id}...");
+            OrderPlaced?.Invoke(this, new OrderEventArgs { OrderId = id, Amount = amount });
+        }
+    }
+
+    // Example 42 — Custom Attributes
+    [AttributeUsage(AttributeTargets.Class)]
+    class RouteAttribute : Attribute
+    {
+        public string Path { get; }
+        public RouteAttribute(string path) => Path = path;
+    }
+
+    [AttributeUsage(AttributeTargets.Method)]
+    class HttpGetAttribute : Attribute
+    {
+        public string Template { get; }
+        public HttpGetAttribute(string template = "") => Template = template;
+    }
+
+    [AttributeUsage(AttributeTargets.Method)]
+    class RequiresAuthAttribute : Attribute { }
+
+    [Route("/api/users")]
+    class ApiController
+    {
+        [HttpGet("{id}")]
+        [RequiresAuth]
+        public string GetUser(int id) => $"User {id}";
+
+        [HttpGet("")]
+        public string GetAll() => "All users";
+    }
+
+    [AttributeUsage(AttributeTargets.Property)]
+    class RequiredAttribute2 : Attribute { }
+
+    [AttributeUsage(AttributeTargets.Property)]
+    class RangeAttribute2 : Attribute
+    {
+        public double Min { get; }
+        public double Max { get; }
+        public RangeAttribute2(double min, double max) { Min = min; Max = max; }
+    }
+
+    class UserModel
+    {
+        [RequiredAttribute2] public string Name { get; set; } = "";
+        [RangeAttribute2(0, 150)] public int Age { get; set; }
+    }
+
+    static class AttributeValidator
+    {
+        public static List<string> Validate(object obj)
+        {
+            var errors = new List<string>();
+            foreach (var prop in obj.GetType().GetProperties())
+            {
+                var val = prop.GetValue(obj);
+                if (prop.GetCustomAttribute<RequiredAttribute2>() != null)
+                    if (val is string s && string.IsNullOrWhiteSpace(s))
+                        errors.Add($"{prop.Name} is required.");
+                if (prop.GetCustomAttribute<RangeAttribute2>() is RangeAttribute2 r)
+                    if (val is int i && (i < r.Min || i > r.Max))
+                        errors.Add($"{prop.Name} must be between {r.Min} and {r.Max}.");
+            }
+            return errors;
+        }
+    }
+
+    // Example 43 — Simple DI Container
+    interface IMessageService { void Send(string msg); }
+    interface IOrderService   { void PlaceOrder(string product, int qty); }
+    interface ILogger2        { void Log(string msg); }
+
+    class EmailService   : IMessageService { public void Send(string m) => Console.WriteLine($"[EMAIL] {m}"); }
+    class ConsoleLogger2 : ILogger2        { public void Log(string m)  => Console.WriteLine($"[LOG] {m}"); }
+
+    class OrderService : IOrderService
+    {
+        readonly IMessageService _msg;
+        readonly ILogger2 _log;
+        public OrderService(IMessageService msg, ILogger2 log) { _msg = msg; _log = log; }
+        public void PlaceOrder(string product, int qty)
+        {
+            _log.Log($"Placing order: {qty}x {product}");
+            _msg.Send($"Order confirmed: {qty}x {product}");
+        }
+    }
+
+    class SimpleContainer
+    {
+        readonly Dictionary<Type, Func<object>> _factories = new();
+        readonly Dictionary<Type, object> _singletons = new();
+
+        public void Register<TInterface, TImpl>() where TImpl : TInterface
+        {
+            _factories[typeof(TInterface)] = () => CreateWithInjection(typeof(TImpl));
+        }
+
+        public void RegisterSingleton<TInterface, TImpl>() where TImpl : TInterface
+        {
+            _factories[typeof(TInterface)] = () =>
+            {
+                if (!_singletons.ContainsKey(typeof(TInterface)))
+                    _singletons[typeof(TInterface)] = CreateWithInjection(typeof(TImpl));
+                return _singletons[typeof(TInterface)];
+            };
+        }
+
+        public T Resolve<T>() => (T)_factories[typeof(T)]();
+
+        private object CreateWithInjection(Type type)
+        {
+            var ctor = type.GetConstructors().OrderByDescending(c => c.GetParameters().Length).First();
+            var args = ctor.GetParameters().Select(p => _factories[p.ParameterType]()).ToArray();
+            return ctor.Invoke(args);
+        }
+    }
+
+    // Example 44 — Options Pattern
+    class DatabaseOptions
+    {
+        public string ConnectionString { get; set; } = "";
+        public int MaxConnections { get; set; } = 10;
+        public int TimeoutSeconds { get; set; } = 30;
+
+        public IEnumerable<string> Validate()
+        {
+            if (string.IsNullOrWhiteSpace(ConnectionString)) yield return "ConnectionString required.";
+            if (MaxConnections <= 0) yield return "MaxConnections must be > 0.";
+            if (TimeoutSeconds <= 0) yield return "TimeoutSeconds must be > 0.";
+        }
+    }
+
+    class UserRepository
+    {
+        readonly DatabaseOptions _opts;
+        public UserRepository(DatabaseOptions opts) => _opts = opts;
+        public string FindUser(int id) => $"User #{id} from {_opts.ConnectionString.Split(';')[0]}";
+    }
+
+    // Example 45 — Immutable collections
+    record AppState(
+        System.Collections.ObjectModel.ReadOnlyCollection<string> Users,
+        int Count);
+
+    // Example 46 — JSON
+    class JsonPerson
+    {
+        public string? Name { get; set; }
+        public int Age { get; set; }
+        public string[]? Tags { get; set; }
+    }
+
+    // Example 47 — Singleton and Abstract Factory
+    class AppDatabase
+    {
+        private static readonly Lazy<AppDatabase> _lazy =
+            new(() => new AppDatabase(), LazyThreadSafetyMode.ExecutionAndPublication);
+
+        public static AppDatabase Instance => _lazy.Value;
+
+        public Guid ConnectionId { get; } = Guid.NewGuid();
+        private AppDatabase() { Console.WriteLine("  AppDatabase initialized (once)."); }
+    }
+
+    interface IButton  { string Render(); }
+    interface ITextBox { string Render(); }
+    interface IUIFactory
+    {
+        IButton  CreateButton();
+        ITextBox CreateTextBox();
+    }
+
+    class WindowsButton  : IButton  { public string Render() => "Windows Button"; }
+    class WindowsTextBox : ITextBox { public string Render() => "Windows TextBox"; }
+    class MacButton      : IButton  { public string Render() => "Mac Button"; }
+    class MacTextBox     : ITextBox { public string Render() => "Mac TextBox"; }
+    class WindowsUIFactory : IUIFactory
+    {
+        public IButton  CreateButton()  => new WindowsButton();
+        public ITextBox CreateTextBox() => new WindowsTextBox();
+    }
+    class MacUIFactory : IUIFactory
+    {
+        public IButton  CreateButton()  => new MacButton();
+        public ITextBox CreateTextBox() => new MacTextBox();
+    }
+
+    // Example 48 — Observer and Mediator
+    record OrderEvent { public int OrderId { get; init; } public decimal Amount { get; init; } }
+
+    class EventBus2<T>
+    {
+        private readonly List<WeakReference<IObserver<T>>> _subs = new();
+
+        public IDisposable Subscribe(IObserver<T> observer)
+        {
+            _subs.Add(new WeakReference<IObserver<T>>(observer));
+            return new Subscription(() => _subs.RemoveAll(r =>
+                r.TryGetTarget(out var t) && ReferenceEquals(t, observer)));
+        }
+
+        public void Publish(T item)
+        {
+            foreach (var weak in _subs.ToList())
+                if (weak.TryGetTarget(out var obs)) obs.OnNext(item);
+        }
+
+        private class Subscription : IDisposable
+        {
+            private Action _remove;
+            public Subscription(Action remove) => _remove = remove;
+            public void Dispose() => _remove();
+        }
+    }
+
+    class EmailNotifier    : IObserver<OrderEvent>
+    {
+        public void OnNext(OrderEvent e) => Console.WriteLine($"Email: Order #{e.OrderId} placed ({e.Amount:C})");
+        public void OnError(Exception ex) { }
+        public void OnCompleted() { }
+    }
+
+    class InventoryUpdater : IObserver<OrderEvent>
+    {
+        public void OnNext(OrderEvent e) => Console.WriteLine($"Inventory: reducing stock for Order #{e.OrderId}");
+        public void OnError(Exception ex) { }
+        public void OnCompleted() { }
+    }
+
+    class AuditLogger : IObserver<OrderEvent>
+    {
+        public void OnNext(OrderEvent e) => Console.WriteLine($"Audit: Order #{e.OrderId} logged at {DateTime.Now:T}");
+        public void OnError(Exception ex) { }
+        public void OnCompleted() { }
+    }
+
+    class SimpleMediator
+    {
+        private readonly Dictionary<Type, Action<object>> _handlers = new();
+        public void Register<T>(Action<T> handler) =>
+            _handlers[typeof(T)] = obj => handler((T)obj);
+        public void Send<T>(T command) where T : notnull
+        {
+            if (_handlers.TryGetValue(typeof(T), out var handler)) handler(command);
+        }
+    }
+
+    record CreateUserCommand { public string Name { get; init; } = ""; }
+    record DeleteUserCommand { public int UserId { get; init; } }
+
+    // Example 49 — Pipeline Builder
+    class RequestContext
+    {
+        public string Path { get; }
+        public Dictionary<string, string> Headers { get; }
+        public string Response { get; set; } = "";
+        public RequestContext(string path, Dictionary<string, string> headers)
+        { Path = path; Headers = headers; }
+    }
+
+    class PipelineBuilder<T>
+    {
+        private readonly List<Func<Func<T, Task>, Func<T, Task>>> _middleware = new();
+
+        public PipelineBuilder<T> Use(Func<T, Func<T, Task>, Task> middleware)
+        {
+            _middleware.Add(next => ctx => middleware(ctx, next));
+            return this;
+        }
+
+        public Func<T, Task> Build()
+        {
+            Func<T, Task> pipeline = _ => Task.CompletedTask;
+            foreach (var m in Enumerable.Reverse(_middleware))
+                pipeline = m(pipeline);
+            return pipeline;
+        }
+    }
+
+    // Example 50 — E-Commerce Domain
+    record DomainProduct(int Id, string Name, decimal Price, int Stock)
+    {
+        public int SoldUnits { get; set; }
+    }
+
+    record OrderItem(int ProductId, int Quantity);
+    record OrderRequest(string CustomerId, OrderItem[] Items);
+
+    record PlacedOrderLine(string Name, int Qty, decimal UnitPrice);
+    record PlacedOrder(string Id, PlacedOrderLine[] Items)
+    {
+        public decimal Total => Items.Sum(i => i.Qty * i.UnitPrice);
+    }
+
+    class Result<T>
+    {
+        private readonly T?      _value;
+        private readonly string? _error;
+        private readonly bool    _isSuccess;
+
+        private Result(T value) { _value = value; _isSuccess = true; }
+        private Result(string error) { _error = error; _isSuccess = false; }
+
+        public static Result<T> Success(T value) => new(value);
+        public static Result<T> Failure(string error) => new(error);
+
+        public void Match(Action<T> onSuccess, Action<string> onFailure)
+        {
+            if (_isSuccess) onSuccess(_value!);
+            else            onFailure(_error!);
+        }
+    }
+
+    class ProductCatalog
+    {
+        private readonly List<DomainProduct> _products = new();
+        private int _nextOrderId = 1000;
+
+        public void AddProduct(DomainProduct p) => _products.Add(p);
+
+        public async Task<Result<PlacedOrder>> PlaceOrderAsync(OrderRequest request)
+        {
+            await Task.Delay(10);  // simulate async I/O
+
+            var lines = new List<PlacedOrderLine>();
+            foreach (var item in request.Items)
+            {
+                var product = _products.FirstOrDefault(p => p.Id == item.ProductId);
+                if (product is null)
+                    return Result<PlacedOrder>.Failure($"Product {item.ProductId} not found.");
+                if (item.Quantity > product.Stock)
+                    return Result<PlacedOrder>.Failure(
+                        $"Insufficient stock for '{product.Name}': " +
+                        $"requested {item.Quantity}, available {product.Stock}.");
+
+                product.SoldUnits += item.Quantity;
+                lines.Add(new PlacedOrderLine(product.Name, item.Quantity, product.Price));
+            }
+
+            var order = new PlacedOrder($"ORD-{++_nextOrderId}", lines.ToArray());
+            return Result<PlacedOrder>.Success(order);
+        }
+
+        public IEnumerable<(string Name, int Units, decimal Revenue)> GetRevenueReport() =>
+            _products.Select(p => (p.Name, p.SoldUnits, p.SoldUnits * p.Price));
+    }
+}
+
+/*
+================================================================================
+  END OF FILE
+  50 C# examples complete — from Hello World to domain-driven design.
+  
+  RECOMMENDED STUDY ORDER:
+    Week 1:  Examples 1–10   (syntax, types, operators)
+    Week 2:  Examples 11–20  (methods, collections, LINQ, files)
+    Week 3:  Examples 21–30  (OOP, interfaces, generics, records)
+    Week 4:  Examples 31–40  (delegates, async, TPL, Span<T>)
+    Week 5:  Examples 41–50  (reflection, DI, patterns, full system)
+
+  KEY DIFFERENCES FROM PYTHON (for students coming from Python):
+    - Statically typed  → types are checked at compile time, not runtime
+    - Value vs reference types → structs are copied, classes are references
+    - No GIL  → true multi-threaded parallelism with TPL
+    - Properties  → encapsulation without get_/set_ methods
+    - async/await → works without an event loop; integrates with TPL
+    - LINQ  → equivalent to Python list comprehensions + itertools + functools
+================================================================================
+*/
